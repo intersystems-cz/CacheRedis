@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2016.2.1 (Build 803U)" ts="2017-06-28 02:14:25">
+<Class name="REDIS.CommandsHandling.CommandPrescribtion">
+<Description>
+This class is Interface for other functions in FunctionsScope</Description>
+<Abstract>1</Abstract>
+<TimeChanged>64462,8065.95626</TimeChanged>
+<TimeCreated>64461,59371.253592</TimeCreated>
+
+<Parameter name="maxParameters">
+<Description>
+constant max parameters</Description>
+</Parameter>
+
+<Method name="RunCommand">
+<Description>
+By calling this method the main routine of command for specific function should run</Description>
+<Abstract>1</Abstract>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>cmdPipeline:%List</FormalSpec>
+<ReturnType>%String</ReturnType>
+</Method>
+
+<Method name="GetHelp">
+<Description>
+After call this method should return string that contains help for specific function </Description>
+<Abstract>1</Abstract>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%String</ReturnType>
+</Method>
+
+<Method name="Compile">
+<Description>
+Special ClassMethod for making demand on implementation of prescribed methods and
+parameters of this class. If some class extends $THIS class and will not implement
+some of methods or parameters of this class then after compilation will programmer
+recieve error about need of implementation of not implemented methods or parameters</Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>objectgenerator</CodeMode>
+<GenerateAfter>RunCommand</GenerateAfter>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	set foundMethods = 0
+	set foundParameters = 0
+	for i=1:1:%class.Methods.Count() {
+		set method = %class.Methods.GetAt(i)
+		if ((method.Name = "RunCommand")||(method.Name = "GetHelp")) {
+			set foundMethods = $increment(foundMethods)	
+		}
+	}
+	for i=1:1:%class.Parameters.Count() {
+		set parameter = %class.Parameters.GetAt(i)
+		if ((parameter.Name = "maxParameters")) {
+			set foundParameters = $increment(foundParameters)	
+		}
+	}
+	if foundMethods'=2 return $$$ERROR($$$GeneralError, "You need to implement all compulsory methods!")
+	if foundParameters'=1 return $$$ERROR($$$GeneralError, "You need to implement all compulsory parameters!")
+	
+	return 1
+]]></Implementation>
+</Method>
+</Class>
+</Export>

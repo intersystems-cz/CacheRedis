@@ -1,19 +1,19 @@
 Class REDIS.Terminal.InputHandler Extends %Persistent
 {
 
-Property FunctionsHandler As REDIS.FunctionsHandling.FunctionsHandler;
+Property CommandsHandler As REDIS.CommandsHandling.CommandsHandler;
 
 Property StringParser As REDIS.Terminal.StringParser;
 
 Property decodedPipeline As %List;
 
-Method Run(cmdPipeline As %String) As %Status
+ClassMethod Run(cmdPipeline As %String) As %Status
 {
 
 	/// decode cmdPipeline to make clear command and parameters	
-	set decodedPipeline = ..StringParser.decodeCommand(cmdPipeline)
+	set decodedPipeline = ##class(REDIS.Terminal.StringParser).decodeCommand(cmdPipeline)
 	
-	write ..FunctionsHandler.SolveExpression(decodedPipeline)
+	write ##class(REDIS.CommandsHandling.CommandsHandler).SolveExpression(decodedPipeline)
 
 	return $$$OK
 }
@@ -41,7 +41,7 @@ Method End() As %Status
 /// class then this oref will be the one returned to the caller of %New method.
 Method %OnNew(webCall As %Integer) As %Status [ Private, ServerOnly = 1 ]
 {
-	set ..FunctionsHandler = ##class(REDIS.FunctionsHandling.FunctionsHandler).%New()
+	set ..CommandsHandler = ##class(REDIS.CommandsHandling.CommandsHandler).%New()
 	set ..StringParser = ##class(REDIS.Terminal.StringParser).%New()
 	
 	/* TODO - for better expiration variables handling
@@ -52,7 +52,7 @@ Method %OnNew(webCall As %Integer) As %Status [ Private, ServerOnly = 1 ]
 	//JOB ##class(REDIS.FunctionsHandling.FunctionsHandler).WatchExpiration()
 	*/
 	if (webCall '= 0){
-		write $Char(27), "!<HTML><style>.thumb1 { background: url(https://davidmles.com/blog/what-is-redis-introduction-ruby/redis.png)"_
+		write $Char(27), "!<HTML><style>.thumb1 { background: url(https://redis-cache-layer-project.000webhostapp.com/redisLogo.png)"_
 		" 50% 50% no-repeat;width: 300px;height: 90px;</style><div class=""thumb1""></div></HTML>"
 	
 		write !,$Char(27)_"[33m"_"  Caché-Redis Version 1.0"_$Char(27)_"[0m",!,
@@ -70,7 +70,7 @@ Storage Default
 <Value>%%CLASSNAME</Value>
 </Value>
 <Value name="2">
-<Value>FunctionsHandler</Value>
+<Value>CommandsHandler</Value>
 </Value>
 <Value name="3">
 <Value>StringParser</Value>

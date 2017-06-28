@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2016.2.1 (Build 803U)" ts="2017-06-28 02:14:26">
+<Class name="REDIS.OnStartJobs">
+<Super>%Persistent</Super>
+<TimeChanged>64462,8066.105593</TimeChanged>
+<TimeCreated>64461,60983.191804</TimeCreated>
+</Class>
+</Export>

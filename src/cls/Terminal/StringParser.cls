@@ -5,7 +5,7 @@ Class REDIS.Terminal.StringParser Extends %Persistent
 /// white characters are removed from future list and only clear list with commnad and
 /// parameters will remain. The data contains common data input inputed from user for
 /// work with REDIS-CACHÉ interface.
-Method decodeCommand(data As %String) As %List
+ClassMethod decodeCommand(data As %String) As %List
 {
 	set List = $ListFromString(data," ")
 	

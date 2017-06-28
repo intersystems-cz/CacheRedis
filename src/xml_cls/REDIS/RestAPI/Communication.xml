@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2016.2.1 (Build 803U)" ts="2017-06-28 02:14:26">
+<Class name="REDIS.RestAPI.Communication">
+<Super>%CSP.REST</Super>
+<TimeChanged>64462,8066.169489</TimeChanged>
+<TimeCreated>64316,48851.547045</TimeCreated>
+
+<XData name="UrlMap">
+<Data><![CDATA[
+<Routes>
+   <Route Url="/set" Method="PUT" Call="Set"/>
+   <Route Url="/get" Method="PUT" Call="Get"/>
+   <Route Url="/del" Method="PUT" Call="Del"/>
+   <Route Url="/incr" Method="PUT" Call="Incr"/>
+   <Route Url="/decr" Method="PUT" Call="Decr"/>
+   <Route Url="/help" Method="PUT" Call="Help"/>
+   
+     <Route Url="/setTimed" Method="PUT" Call="SetTimed"/>
+   
+   <!-- Your goal is to implement /message URL route, and just like with /ping
+   	you need to output the data in JSON format. My program will expect "message" 
+   	property in JSON object you output. -->
+</Routes>
+]]></Data>
+</XData>
+
+<Method name="Set">
+<Description>
+call set function with key and value pair parameters</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	set setObject = {}.%FromJSON(%request.Content)
+	set key = setObject.key
+	set value = setObject.value
+	
+	set redis = ##class(REDIS.Terminal.InputHandler).%New(0)
+	set result = redis.Run("SET "_key_" "_value)
+	
+	set obj = {
+		"Communication OK ": (result)
+    }
+    write obj.%ToJSON()
+
+	return $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="Get">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	set setObject = {}.%FromJSON(%request.Content)
+	set key = setObject.key
+	
+	set redis = ##class(REDIS.Terminal.InputHandler).%New(0)
+	set result = redis.Run("GET "_key)
+	
+	set obj = {
+		"Communication OK ": (result)
+    }
+    write obj.%ToJSON()
+
+	return $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="Del">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	set setObject = {}.%FromJSON(%request.Content)
+	set key = setObject.key
+	
+	set redis = ##class(REDIS.Terminal.InputHandler).%New(0)
+	set result = redis.Run("DEL "_key)
+	
+	set obj = {
+		"Communication OK ": (result)
+    }
+    write obj.%ToJSON()
+
+	return $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="Incr">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	set setObject = {}.%FromJSON(%request.Content)
+	set key = setObject.key
+	
+	set redis = ##class(REDIS.Terminal.InputHandler).%New(0)
+	set result = redis.Run("INCR "_key)
+	
+	set obj = {
+		"Communication OK ": (result)
+    }
+    write obj.%ToJSON()
+
+	return $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="Decr">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	set setObject = {}.%FromJSON(%request.Content)
+	set key = setObject.key
+	
+	set redis = ##class(REDIS.Terminal.InputHandler).%New(0)
+	set result = redis.Run("DECR "_key)
+	
+	set obj = {
+		"Communication OK ": (result)
+    }
+    write obj.%ToJSON()
+
+	return $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="Help">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	set setObject = {}.%FromJSON(%request.Content)
+	set key = setObject.key
+	
+	set redis = ##class(REDIS.Terminal.InputHandler).%New(0)
+	set result = redis.Run("HELP "_key)
+	
+	set obj = {
+		"Communication OK ": (result)
+    }
+    write obj.%ToJSON()
+
+	return $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="SetTimed">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	set setObject = {}.%FromJSON(%request.Content)
+	set key = setObject.key
+	set value = setObject.value
+	set option = setObject.option
+	set time = setObject.time
+	
+	set redis = ##class(REDIS.Terminal.InputHandler).%New(0)
+	set result = redis.Run("SET "_key_" "_value_" "_option_" "_time)
+	
+	set obj = {
+		"Communication OK ": (result)
+    }
+    write obj.%ToJSON()
+
+	return $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPreDispatch">
+<Description>
+Apply some settings for all requests</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[pUrl:%String,pMethod:%String,&pContinue:%Boolean]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	set %response.CharSet = "utf-8"
+	set %response.ContentType = "application/json"
+	do %response.SetHeader("Access-Control-Allow-Origin", "*")
+	return $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>

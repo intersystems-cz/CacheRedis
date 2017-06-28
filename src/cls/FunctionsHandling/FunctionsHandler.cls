@@ -3,7 +3,7 @@ Class REDIS.FunctionsHandling.FunctionsHandler Extends %Persistent
 
 /// Method for calling command that is part of cmdPipeline list, where first is needed
 ///  to resolve if expression is correct as far as command with parameters count
-Method SolveExpression(cmdPipeline As %List) As %String
+ClassMethod SolveExpression(cmdPipeline As %List) As %String
 {
 	set result = ""
 	set classFunction = "REDIS.FunctionsScope."_$LIST(cmdPipeline,1)
