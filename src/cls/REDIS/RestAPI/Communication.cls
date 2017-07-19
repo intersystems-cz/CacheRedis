@@ -1,12 +1,8 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2016.2.1 (Build 803U)" ts="2017-06-28 02:14:26">
-<Class name="REDIS.RestAPI.Communication">
-<Super>%CSP.REST</Super>
-<TimeChanged>64462,8066.169489</TimeChanged>
-<TimeCreated>64316,48851.547045</TimeCreated>
+Class REDIS.RestAPI.Communication Extends %CSP.REST
+{
 
-<XData name="UrlMap">
-<Data><![CDATA[
+XData UrlMap
+{
 <Routes>
    <Route Url="/set" Method="PUT" Call="Set"/>
    <Route Url="/get" Method="PUT" Call="Get"/>
@@ -21,15 +17,11 @@
    	you need to output the data in JSON format. My program will expect "message" 
    	property in JSON object you output. -->
 </Routes>
-]]></Data>
-</XData>
+}
 
-<Method name="Set">
-<Description>
-call set function with key and value pair parameters</Description>
-<ClassMethod>1</ClassMethod>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// call set function with key and value pair parameters
+ClassMethod Set() As %Status
+{
 	set setObject = {}.%FromJSON(%request.Content)
 	set key = setObject.key
 	set value = setObject.value
@@ -43,13 +35,10 @@ call set function with key and value pair parameters</Description>
     write obj.%ToJSON()
 
 	return $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="Get">
-<ClassMethod>1</ClassMethod>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+ClassMethod Get() As %Status
+{
 	set setObject = {}.%FromJSON(%request.Content)
 	set key = setObject.key
 	
@@ -62,13 +51,10 @@ call set function with key and value pair parameters</Description>
     write obj.%ToJSON()
 
 	return $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="Del">
-<ClassMethod>1</ClassMethod>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+ClassMethod Del() As %Status
+{
 	set setObject = {}.%FromJSON(%request.Content)
 	set key = setObject.key
 	
@@ -81,13 +67,10 @@ call set function with key and value pair parameters</Description>
     write obj.%ToJSON()
 
 	return $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="Incr">
-<ClassMethod>1</ClassMethod>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+ClassMethod Incr() As %Status
+{
 	set setObject = {}.%FromJSON(%request.Content)
 	set key = setObject.key
 	
@@ -100,13 +83,10 @@ call set function with key and value pair parameters</Description>
     write obj.%ToJSON()
 
 	return $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="Decr">
-<ClassMethod>1</ClassMethod>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+ClassMethod Decr() As %Status
+{
 	set setObject = {}.%FromJSON(%request.Content)
 	set key = setObject.key
 	
@@ -119,13 +99,10 @@ call set function with key and value pair parameters</Description>
     write obj.%ToJSON()
 
 	return $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="Help">
-<ClassMethod>1</ClassMethod>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+ClassMethod Help() As %Status
+{
 	set setObject = {}.%FromJSON(%request.Content)
 	set key = setObject.key
 	
@@ -138,13 +115,10 @@ call set function with key and value pair parameters</Description>
     write obj.%ToJSON()
 
 	return $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="SetTimed">
-<ClassMethod>1</ClassMethod>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+ClassMethod SetTimed() As %Status
+{
 	set setObject = {}.%FromJSON(%request.Content)
 	set key = setObject.key
 	set value = setObject.value
@@ -160,21 +134,16 @@ call set function with key and value pair parameters</Description>
     write obj.%ToJSON()
 
 	return $$$OK
-]]></Implementation>
-</Method>
+}
 
-<Method name="OnPreDispatch">
-<Description>
-Apply some settings for all requests</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec><![CDATA[pUrl:%String,pMethod:%String,&pContinue:%Boolean]]></FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
+/// Apply some settings for all requests
+ClassMethod OnPreDispatch(pUrl As %String, pMethod As %String, ByRef pContinue As %Boolean) As %Status
+{
 	set %response.CharSet = "utf-8"
 	set %response.ContentType = "application/json"
 	do %response.SetHeader("Access-Control-Allow-Origin", "*")
 	return $$$OK
-]]></Implementation>
-</Method>
-</Class>
-</Export>
+}
+
+}
+

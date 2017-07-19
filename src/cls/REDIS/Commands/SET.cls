@@ -11,7 +11,6 @@ ClassMethod RunCommand(cmdPipeline As %List) As %String
 	// test number of parameters between 2 or 4
 	set paramNum = ($LISTLENGTH(cmdPipeline)-1)
 	
-	
 	/// means that classic function manner "SET VARIABLE" is used
 	if (paramNum = 2){
 		set result = ..SetVariable(cmdPipeline)
@@ -44,7 +43,7 @@ ClassMethod RunCommand(cmdPipeline As %List) As %String
 		if (option = "EX"){
 			// toDo test if number
 			if ($NUMBER($LIST(cmdPipeline,5)) '= ""){
-				JOB ##class(REDIS.Commands.SET).SetTimedVariable(cmdPipeline,$LIST(cmdPipeline,5))
+				do ##class(REDIS.Commands.SET).SetTimedVariable(cmdPipeline,$LIST(cmdPipeline,5))
 				set result = "OK"
 			}
 			else
@@ -57,7 +56,7 @@ ClassMethod RunCommand(cmdPipeline As %List) As %String
 			if ($NUMBER($LIST(cmdPipeline,5)) '= ""){
 				// conversion to miliseconds:
 				set $LIST(cmdPipeline,5) = $LIST(cmdPipeline,5)/1000
-				JOB ##class(REDIS.Commands.SET).SetTimedVariable(cmdPipeline,$LIST(cmdPipeline,5))
+				do ##class(REDIS.Commands.SET).SetTimedVariable(cmdPipeline,$LIST(cmdPipeline,5))
 				set result = "OK"
 			}
 			else
@@ -93,40 +92,33 @@ ClassMethod GetHelp() As %String
 /// Sets the key-value pair variable with timing
 ClassMethod SetTimedVariable(cmdPipeline As %List, numSeconds As %String)
 {
-	
-	 /*// better implementation of timing with variables:
-	
-	set actualTime = $now()
-	set timeExpire = "notDefined"
-	set days = $PIECE((($piece(actualTime,",",*)+numSeconds)/86399),".")
-	
-	if (days = "")
-	{
-		// the variable will expire today, no day ++ is needed
-		set timeExpire = ($piece(actualTime,","))_","_($piece(actualTime,",",*) + numSeconds)
-		
-	}else{
-		// the variable will expire another day, it is needed
-		// to write "days"++ to actualTime to compute expiration time
-		// , other seconds left must be added to seconds of actualTime
-		set overlappingSeconds = ($piece(actualTime,",",*)+numSeconds
-		set timeExpire = ($piece(actualTime,","))+days)_","_(overlappingSeconds - ((overlappingSeconds\86399)*86399))
+	 
+	/// test if variable exist as expire variable
+	if ($data(^data($LIST(cmdPipeline,2),"expires")) '= 0 ){
+		kill ^cleaner(^data($LIST(cmdPipeline,2),"expires"))
+		kill ^data($LIST(cmdPipeline,2))
 	}
-	// expiration time is prepared and can be saved into globals
-	// , dont forget to set global ^expires for garbadge collctor job
-	set ^expires(timeExpire) = ("^"_$LIST(cmdPipeline,2))
-	set ^data(("^"_$LIST(cmdPipeline,2))) = $LB(timeExpire,$LIST(cmdPipeline,3))
 	
-	*/
+	set actualTime = $NOW()
+	set dateval = $PIECE(actualTime,",",1)
+	set timeval = $PIECE(actualTime,",",2)
+	// numberOfDays * numberOfHoursAday * numberOfSecondsAHour
+	set actualTimeInSec = dateval*24*3600 + timeval
+	set whenToKillVariable = actualTimeInSec + numSeconds
 	
+	set ^data($LIST(cmdPipeline,2)) = $LIST(cmdPipeline,3)
+	set ^data($LIST(cmdPipeline,2), "expires") = whenToKillVariable
 	
+	set test = $get(^cleaner(whenToKillVariable))
+	if (test '= "") {
+	  set $LIST(^cleaner(whenToKillVariable), *+1) = $LIST(cmdPipeline,2)
+	} else {
+	  set ^cleaner(whenToKillVariable) = $LB($LIST(cmdPipeline,2))
+	}
 	
-	// set value to global / create global as key/value pair
-	set @("^"_$LIST(cmdPipeline,2)) = $LIST(cmdPipeline,3)
-	
-	HANG numSeconds
-	
-	kill @("^"_$LIST(cmdPipeline,2))
+	// interrupt cleaner process to recalculate hang time
+	do $System.Util.SendInterrupt(^cleanerPid)
+	//w "interrupted process "_^cleanerPid,!
 }
 
 /// Sets the key-value pair variable without timing

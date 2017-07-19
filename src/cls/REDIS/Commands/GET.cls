@@ -7,13 +7,51 @@ Parameter maxParameters = 1;
 ClassMethod RunCommand(cmdPipeline As %List) As %String
 {
 	set status =""
+
+	set result = ""
 	
-	if ($DATA(@("^"_$LIST(cmdPipeline,2)))){
+	if ( $DATA(^data($LIST(cmdPipeline,2))) = 1 ){
+		if ( $DATA(^data($LIST(cmdPipeline,2),"expires")) = 1 ){
+			   if ( ..GetLeftTimeToLive() > 0 ){		
+				return ^data($LIST(cmdPipeline,2))
+			   } else{
+				set result = "(NIL)"
+			   }
+		} else{
+			return ^data($LIST(cmdPipeline,2))
+		}
+	} else{
+	   set result = "(NIL)"
+	}
+	
+	return result	
+
+	/*
+
+	if ($DATA(^data($LIST(cmdPipeline,2)),"expires")){
 		set status =  @("^"_$LIST(cmdPipeline,2))
 	}else{
 		set status = "(nil)"
 	}
+	*/
 	return status
+}
+
+ClassMethod GetLeftTimeToLive(varName As %String) As %String
+{
+
+	// if ...
+		set actualTime = $NOW()
+		set dateval = $PIECE(actualTime,",",1)
+		set timeval = $PIECE(actualTime,",",2)
+		// numberOfDays * numberOfHoursAday * numberOfSecondsAHour
+		set actualTimeInSec = dateval*24*3600 + timeval
+		
+		// ## TODO get from globals time when var should expire
+				
+		set timeLeftToLive = $order(^cleaner("")) - actualTimeInSec
+		
+		return timeLeftToLive
 }
 
 ClassMethod GetHelp() As %String

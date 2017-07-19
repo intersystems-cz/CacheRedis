@@ -1,3 +1,4 @@
+/// This class contain ClassMethods for every command to Run command as a textual command
 Class REDIS.API Extends %Persistent
 {
 
