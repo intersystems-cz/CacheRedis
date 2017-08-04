@@ -8,13 +8,13 @@ Parameter maxParameters = 1;
 ClassMethod RunCommand(cmdPipeline As %List) As %String
 {
 	set status =""
-	if ($DATA(@("^"_$LIST(cmdPipeline,2)))){
-		set @("^"_$LIST(cmdPipeline,2)) = $increment(@("^"_$LIST(cmdPipeline,2)))
-		set status ="(integer) "_@("^"_$LIST(cmdPipeline,2))
+	if ($DATA(^data($LIST(cmdPipeline,2)))){
+		set ^data($LIST(cmdPipeline,2)) = $increment(^data($LIST(cmdPipeline,2)))
+		set status ="(integer) "_^data($LIST(cmdPipeline,2))
 	}else{
 		set list = $LB("SET",$LIST(cmdPipeline,2),"1")
 		// needed to set variable if not exist
-		set status = ##class(REDIS.FunctionsScope.SET).RunCommand(list)
+		set status = ##class(REDIS.Commands.SET).RunCommand(list)
 	}
 	return status
 }

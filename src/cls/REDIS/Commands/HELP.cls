@@ -15,12 +15,19 @@ ClassMethod RunCommand(cmdPipeline As %List) As %String
 	}
 	/// user typed "HELP" with one parameter
 	else{
-		set className = "REDIS.Commands."_$LIST(cmdPipeline,2)
+		set className = "REDIS.Commands."_$ZCONVERT($LIST(cmdPipeline,2),"U")
 				
 		/// GET ALL COMPILED CLASSES FROM PACKAGE: Commands 	
+		/*
 		&sql(select LIST(id) into :classesList from %Dictionary.CompiledClass where
 		id LIKE 'REDIS.Commands.%' AND id NOT LIKE 'REDIS.Commands.HELP' AND id = :className)
+		*/
 		
+		&sql(select LIST(id) into :classesList from (
+			select id as id from %Dictionary.CompiledClass where
+			id LIKE 'REDIS.Commands.%' AND id NOT LIKE 'REDIS.Commands.HELP'
+			AND id = :className
+		) As result)
 				
 		set classesList = $LISTFROMSTRING(classesList)
 						

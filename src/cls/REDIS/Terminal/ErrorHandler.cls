@@ -37,5 +37,12 @@ ClassMethod NotNumber(cmdPipeline As %List) As %String
 	return result
 }
 
+/// If given value is not number or not integer, is used by commands: INCRBY, DECRBY
+ClassMethod NotNumberNotInteger() As %String
+{
+	set result = $Char(27)_"[31m"_" (error) ERR value is not an integer or out of range"_$Char(27)_"[0m"
+	return result
+}
+
 }
 

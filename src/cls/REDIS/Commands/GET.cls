@@ -6,13 +6,11 @@ Parameter maxParameters = 1;
 /// Method for returning value setted under specific key
 ClassMethod RunCommand(cmdPipeline As %List) As %String
 {
-	set status =""
-
 	set result = ""
 	
-	if ( $DATA(^data($LIST(cmdPipeline,2))) = 1 ){
-		if ( $DATA(^data($LIST(cmdPipeline,2),"expires")) = 1 ){
-			   if ( ..GetLeftTimeToLive() > 0 ){		
+	if ( $DATA(^data($LIST(cmdPipeline,2))) '= 0 ){
+		if ( $DATA(^data($LIST(cmdPipeline,2),"expires")) '= 0 ){
+			   if ( ..GetLeftTimeToLive($LIST(cmdPipeline,2)) > 0 ){		
 				return ^data($LIST(cmdPipeline,2))
 			   } else{
 				set result = "(NIL)"
@@ -40,16 +38,16 @@ ClassMethod RunCommand(cmdPipeline As %List) As %String
 ClassMethod GetLeftTimeToLive(varName As %String) As %String
 {
 
-	// if ...
 		set actualTime = $NOW()
 		set dateval = $PIECE(actualTime,",",1)
 		set timeval = $PIECE(actualTime,",",2)
+		
 		// numberOfDays * numberOfHoursAday * numberOfSecondsAHour
 		set actualTimeInSec = dateval*24*3600 + timeval
-		
-		// ## TODO get from globals time when var should expire
 				
-		set timeLeftToLive = $order(^cleaner("")) - actualTimeInSec
+		set timeLeftToLive = ^data(varName,"expires") - actualTimeInSec
+		
+		w timeLeftToLive
 		
 		return timeLeftToLive
 }

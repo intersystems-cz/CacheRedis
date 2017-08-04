@@ -10,13 +10,13 @@ ClassMethod RunCommand(cmdPipeline As %List) As %String
 	set numDeleted = 0
 	for i=2:1:($LL(cmdPipeline))
 	{
-		if ($DATA(@("^"_$LIST(cmdPipeline,i)))){
-			kill @("^"_$LIST(cmdPipeline,i))
+		if ($DATA(^data($LIST(cmdPipeline,i)))){
+			kill ^data($LIST(cmdPipeline,i))
 			set numDeleted = $increment(numDeleted)
 		}
 	}
 	
-	return numDeleted
+	return "(integer) "_numDeleted
 }
 
 ClassMethod GetHelp() As %String

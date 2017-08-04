@@ -1,13 +1,114 @@
-Class REDIS.Commands.SET Extends REDIS.CommandsHandling.CommandPrescribtion [ Abstract ]
+Class REDIS.Commands.PEXPIRE Extends REDIS.CommandsHandling.CommandPrescribtion [ Abstract ]
 {
 
 /// constant max parameters
-Parameter maxParameters = 4;
+Parameter maxParameters = 2;
 
 ClassMethod RunCommand(cmdPipeline As %List) As %String
 {
 	set result = ""
 	
+	
+	if ($DATA(^data($LIST(cmdPipeline,2)))){
+			/// test if variable exist as expire variable
+		if ($DATA(^data($LIST(cmdPipeline,2),"expires")) '= 0 ){
+			//kill ^cleaner(^data($LIST(cmdPipeline,2),"expires"))
+			//kill ^data($LIST(cmdPipeline,2))
+			   set value = ^data($LIST(cmdPipeline,2))
+
+			   if ( ..GetLeftTimeToLive($LIST(cmdPipeline,2)) > 0 && $DATA(value)){
+			   
+			   		set num = $LIST(cmdPipeline,3)		
+						
+					// TODO TEST IF seconds($LIST(cmdPipeline,3)) is NUMBER, 
+					// redis allows even 00023 format interpreted as 23s
+					if ($isvalidnum(num)&&(+num\1=+num)) {
+					 	
+						set actualTime = $NOW()
+						set dateval = $PIECE(actualTime,",",1)
+						set timeval = $PIECE(actualTime,",",2)
+						// numberOfDays * numberOfHoursAday * numberOfSecondsAHour
+						set actualTimeInSec = dateval*24*3600 + timeval
+						set whenToKillVariable = actualTimeInSec + ($LIST(cmdPipeline,3)/1000)
+						
+						
+						// this line is just to approve consistency - but not 100% == TODO
+						set ^data($LIST(cmdPipeline,2)) = value
+						// get oldExpiration time
+						set oldExpiration = ^data($LIST(cmdPipeline,2),"expires")
+						// set new expiration time
+						set ^data($LIST(cmdPipeline,2), "expires") = whenToKillVariable
+						
+						
+						// test if in oldExpiration global is saved in list just one record
+						if ($LL(^cleaner(oldExpiration)) = 1){
+							// kill whole list
+							kill ^cleaner(oldExpiration)
+						} else{
+							// kill only specific member of list
+							set $LIST(^cleaner(oldExpiration),$LISTFIND(^cleaner(oldExpiration),value)) = ""
+						}
+						
+						set test = $get(^cleaner(whenToKillVariable))
+						if (test '= "") {
+						  set $LIST(^cleaner(whenToKillVariable), *+1) = $LIST(cmdPipeline,2)
+						} else {
+						  set ^cleaner(whenToKillVariable) = $LB($LIST(cmdPipeline,2))
+						}
+						
+						// interrupt cleaner process to recalculate hang time
+						do $System.Util.SendInterrupt(^cleanerPid)
+						
+						set result = "(integer) 1"
+					  
+					} else {
+					 set result = ##class(REDIS.Terminal.ErrorHandler).NotNumber(cmdPipeline)
+					}
+
+					
+			   } else{
+				set result = "(integer) 0"
+			   }
+		}else {
+		
+			set value = ^data($LIST(cmdPipeline,2))
+			set num = $LIST(cmdPipeline,3)		
+			
+			if ($isvalidnum(num)&&(+num\1=+num)) {
+					 
+						set actualTime = $NOW()
+						set dateval = $PIECE(actualTime,",",1)
+						set timeval = $PIECE(actualTime,",",2)
+						// numberOfDays * numberOfHoursAday * numberOfSecondsAHour
+						set actualTimeInSec = dateval*24*3600 + timeval
+						set whenToKillVariable = actualTimeInSec + ($LIST(cmdPipeline,3)/1000)
+						
+						set ^data($LIST(cmdPipeline,2)) = value
+						set ^data($LIST(cmdPipeline,2), "expires") = whenToKillVariable
+						
+						set test = $get(^cleaner(whenToKillVariable))
+						if (test '= "") {
+						  set $LIST(^cleaner(whenToKillVariable), *+1) = $LIST(cmdPipeline,2)
+						} else {
+						  set ^cleaner(whenToKillVariable) = $LB($LIST(cmdPipeline,2))
+						}
+						
+						// interrupt cleaner process to recalculate hang time
+						do $System.Util.SendInterrupt(^cleanerPid)
+						
+						set result = "(integer) 1"
+					  
+					} else {
+					 set result = ##class(REDIS.Terminal.ErrorHandler).NotNumber(cmdPipeline)
+					}
+		
+			
+		}
+	}else{
+		set result = "(integer) 0"
+	}
+	
+	/*
 	// test number of parameters between 2 or 4
 	set paramNum = ($LISTLENGTH(cmdPipeline)-1)
 	
@@ -69,7 +170,7 @@ ClassMethod RunCommand(cmdPipeline As %List) As %String
 			set result = ##class(REDIS.Terminal.ErrorHandler).SyntaxError(" Option """_option_""" not exist, see ""help set""")
 		}
 	}
-	
+	*/
 	return result
 }
 
@@ -87,6 +188,21 @@ ClassMethod GetHelp() As %String
     $Char(27)_"[35m"_"  RETURN VALUE:"_$Char(27)_"[0m"_" Status code reply: OK if SET was executed correctly. Null multi-bulk reply: a Null Bulk Reply"_$char(10,13)_
     $char(9)_$char(9)_"is returned if the SET operation was not performed becase the user specified the NX or XX "_$char(10,13)_
     $char(9)_$char(9)_"option but the condition was not met."_$char(10,13)
+}
+
+ClassMethod GetLeftTimeToLive(varName As %String) As %String
+{
+
+		set actualTime = $NOW()
+		set dateval = $PIECE(actualTime,",",1)
+		set timeval = $PIECE(actualTime,",",2)
+		
+		// numberOfDays * numberOfHoursAday * numberOfSecondsAHour
+		set actualTimeInSec = dateval*24*3600 + timeval
+				
+		set timeLeftToLive = ^data(varName,"expires") - actualTimeInSec
+		
+		return timeLeftToLive
 }
 
 /// Sets the key-value pair variable with timing
@@ -119,15 +235,6 @@ ClassMethod SetTimedVariable(cmdPipeline As %List, numSeconds As %String)
 	// interrupt cleaner process to recalculate hang time
 	do $System.Util.SendInterrupt(^cleanerPid)
 	//w "interrupted process "_^cleanerPid,!
-}
-
-/// Sets the key-value pair variable without timing
-ClassMethod SetVariable(cmdPipeline As %List) As %String
-{
-	set globalName = $LIST(cmdPipeline,2)
-	set valueToSet = $LIST(cmdPipeline,3)
-	set result = $XECUTE("(value) SET ^data("""_globalName_""")=value QUIT ""OK""",valueToSet)	
-	return result
 }
 
 }

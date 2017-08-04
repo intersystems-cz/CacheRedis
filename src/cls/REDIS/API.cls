@@ -2,6 +2,16 @@
 Class REDIS.API Extends %Persistent
 {
 
+ClassMethod Append(varName As %String, value As %String)
+{
+	if ($DATA(varName)>0){
+		if ($DATA(value)>0){
+			set textualListCommand = ##class(REDIS.API).ConvertToList(varName,value) 	
+		 	w ##class(REDIS.Commands.APPEND).RunCommand(textualListCommand)
+	 	}
+ 	}
+}
+
 ClassMethod Decr(varName As %String)
 {
 	if ($DATA(varName)>0){
@@ -15,6 +25,26 @@ ClassMethod Incr(varName As %String)
 	if ($DATA(varName)>0){
 		set textualListCommand = ##class(REDIS.API).ConvertToList(varName) 	
 	 	w ##class(REDIS.Commands.INCR).RunCommand(textualListCommand)
+ 	}
+}
+
+ClassMethod Incrby(varName As %String, value As %String)
+{
+	if ($DATA(varName)>0){
+		if ($DATA(value)>0){
+			set textualListCommand = ##class(REDIS.API).ConvertToList(varName,value) 	
+		 	w ##class(REDIS.Commands.INCRBY).RunCommand(textualListCommand)
+		}
+ 	}
+}
+
+ClassMethod Decrby(varName As %String, value As %String)
+{
+	if ($DATA(varName)>0){
+		if ($DATA(value)>0){
+			set textualListCommand = ##class(REDIS.API).ConvertToList(varName,value) 	
+		 	w ##class(REDIS.Commands.DECRBY).RunCommand(textualListCommand)
+		}
  	}
 }
 
@@ -47,6 +77,75 @@ ClassMethod Get(varName As %String)
 	if ($DATA(varName)>0){
 	 	set textualListCommand = ##class(REDIS.API).ConvertToList(varName)
 	 	w ##class(REDIS.Commands.GET).RunCommand(textualListCommand)
+ 	}
+}
+
+ClassMethod Exists(varName As %String)
+{
+	if ($DATA(varName)>0){
+	 	set textualListCommand = ##class(REDIS.API).ConvertToList(varName)
+	 	w ##class(REDIS.Commands.EXISTS).RunCommand(textualListCommand)
+ 	}
+}
+
+ClassMethod Expire(varName As %String, seconds As %String)
+{
+	if ($DATA(varName) > 0){
+		if ($DATA(seconds) > 0){
+		 	set textualListCommand = ##class(REDIS.API).ConvertToList(varName,seconds)
+		 	w ##class(REDIS.Commands.EXPIRE).RunCommand(textualListCommand)
+	 	}
+ 	}
+}
+
+ClassMethod Pexpire(varName As %String, miliseconds As %String)
+{
+	if ($DATA(varName) > 0){
+		if ($DATA(miliseconds) > 0){
+		 	set textualListCommand = ##class(REDIS.API).ConvertToList(varName,miliseconds)
+		 	w ##class(REDIS.Commands.PEXPIRE).RunCommand(textualListCommand)
+	 	}
+ 	}
+}
+
+ClassMethod Ttl(varName As %String)
+{
+	if ($DATA(varName)>0){
+	 	set textualListCommand = ##class(REDIS.API).ConvertToList(varName)
+	 	w ##class(REDIS.Commands.TTL).RunCommand(textualListCommand)
+ 	}
+}
+
+ClassMethod Pttl(varName As %String)
+{
+	if ($DATA(varName)>0){
+	 	set textualListCommand = ##class(REDIS.API).ConvertToList(varName)
+	 	w ##class(REDIS.Commands.PTTL).RunCommand(textualListCommand)
+ 	}
+}
+
+ClassMethod Strlen(varName As %String)
+{
+	if ($DATA(varName)>0){
+	 	set textualListCommand = ##class(REDIS.API).ConvertToList(varName)
+	 	w ##class(REDIS.Commands.STRLEN).RunCommand(textualListCommand)
+ 	}
+}
+
+ClassMethod Type(varName As %String)
+{
+	if ($DATA(varName)>0){
+	 	set textualListCommand = ##class(REDIS.API).ConvertToList(varName)
+	 	w ##class(REDIS.Commands.TYPE).RunCommand(textualListCommand)
+ 	}
+}
+
+ClassMethod Ping(varName As %String)
+{
+	if ($DATA(varName)=0){
+		set varName = "ping"
+	 	set textualListCommand = ##class(REDIS.API).ConvertToList(varName)
+	 	w ##class(REDIS.Commands.PING).RunCommand(textualListCommand)
  	}
 }
 
