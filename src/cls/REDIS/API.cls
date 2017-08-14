@@ -149,6 +149,15 @@ ClassMethod Ping(varName As %String)
  	}
 }
 
+ClassMethod Time(varName As %String)
+{
+	if ($DATA(varName)=0){
+		set varName = "time"
+	 	set textualListCommand = ##class(REDIS.API).ConvertToList(varName)
+	 	w ##class(REDIS.Commands.TIME).RunCommand(textualListCommand)
+ 	}
+}
+
 ClassMethod Help(commandName As %String)
 {
 	if ($DATA(commandName)>0){
