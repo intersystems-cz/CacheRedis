@@ -44,13 +44,6 @@ Method %OnNew(webCall As %Integer) As %Status [ Private, ServerOnly = 1 ]
 	set ..CommandsHandler = ##class(REDIS.CommandsHandling.CommandsHandler).%New()
 	set ..StringParser = ##class(REDIS.Terminal.StringParser).%New()
 	
-	/* TODO - for better expiration variables handling
-	/// creation of important globals
-	//set ^redisWork = 1
-	
-	/// creation of JOB control routines
-	//JOB ##class(REDIS.FunctionsHandling.FunctionsHandler).WatchExpiration()
-	*/
 	if (webCall '= 0){
 		write $Char(27), "!<HTML><style>.thumb1 { background: url(https://redis-cache-layer-project.000webhostapp.com/redisLogo.png)"_
 		" 50% 50% no-repeat;width: 300px;height: 90px;</style><div class=""thumb1""></div></HTML>"

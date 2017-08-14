@@ -35,19 +35,6 @@ ClassMethod SolveExpression(cmdPipeline As %List) As %String
 	return result
 }
 
-/// Class Method for one job to watch on data expiration
-ClassMethod WatchExpiration()
-{
-	while($Data(^redisWork)){
-		HANG 1
-		if ($DATA(^data)){
-			// TODO - start cycle until there is variable that should not still expire
-			// TODO 
-		}
-		// TODO 
-	}
-}
-
 Storage Default
 {
 <Data name="CommandsHandlerDefaultData">
