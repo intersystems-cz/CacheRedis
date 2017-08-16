@@ -31,7 +31,7 @@ ClassMethod RunCommand(cmdPipeline As %List) As %String
 						set actualTimeInSec = dateval*24*3600 + timeval
 						set whenToKillVariable = actualTimeInSec + $LIST(cmdPipeline,3)
 						
-						// this line is just to approve consistency - but not 100% == TODO
+						// this line is just to approve consistency - but not 100% == TODO = locks needed
 						set ^data($LIST(cmdPipeline,2)) = value
 						// get oldExpiration time
 						set oldExpiration = ^data($LIST(cmdPipeline,2),"expires")

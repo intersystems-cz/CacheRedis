@@ -126,6 +126,8 @@ ClassMethod SetVariable(cmdPipeline As %List) As %String
 {
 	set globalName = $LIST(cmdPipeline,2)
 	set valueToSet = $LIST(cmdPipeline,3)
+	// data type
+
 	set result = $XECUTE("(value) SET ^data("""_globalName_""")=value QUIT ""OK""",valueToSet)	
 	return result
 }

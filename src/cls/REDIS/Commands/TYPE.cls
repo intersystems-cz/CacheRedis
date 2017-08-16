@@ -17,7 +17,11 @@ ClassMethod RunCommand(cmdPipeline As %List) As %String
 	
 	
 	if ($DATA(^data($LIST(cmdPipeline,2)))){
-		set result = """string"""
+		if ($DATA(^data($LIST(cmdPipeline,2),"type"))){
+			s result = ^data($LIST(cmdPipeline,2),"type")
+		} else{
+			set result = """string"""
+		}
 	}else{
 		set result = """none"""
 	}

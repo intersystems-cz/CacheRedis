@@ -24,7 +24,7 @@ ClassMethod RunCommand(cmdPipeline As %List) As %String
 	
 	return result	
 
-	/*
+	/* //OLD IMPLMENTATION
 
 	if ($DATA(^data($LIST(cmdPipeline,2)),"expires")){
 		set status =  @("^"_$LIST(cmdPipeline,2))

@@ -11,6 +11,20 @@ ClassMethod RunCommand(cmdPipeline As %List) As %String
 	for i=2:1:($LL(cmdPipeline))
 	{
 		if ($DATA(^data($LIST(cmdPipeline,i)))){
+		
+			
+			// test if variable is not timed and should be killed in cleaner
+			if ($DATA(^data($LIST(cmdPipeline,i),"expires"))){
+			
+				set timeToExp = ^data($LIST(cmdPipeline,i),"expires")
+				
+				if ($LL(^cleaner(timeToExp))>1){
+					set index = $LF(^cleaner(timeToExp),$LIST(cmdPipeline,i))
+					set $list(^cleaner(timeToExp),index,index) = ""
+				}else{
+					kill ^cleaner(timeToExp)
+				}
+			}
 			kill ^data($LIST(cmdPipeline,i))
 			set numDeleted = $increment(numDeleted)
 		}
