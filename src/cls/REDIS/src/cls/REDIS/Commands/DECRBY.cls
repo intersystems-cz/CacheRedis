@@ -1,24 +1,35 @@
-Class REDIS.Commands.INCR Extends REDIS.CommandsHandling.CommandPrescribtion [ Abstract ]
+Class REDIS.Commands.DECRBY Extends REDIS.CommandsHandling.CommandPrescribtion [ Abstract ]
 {
 
-Parameter maxParameters = 1;
+Parameter maxParameters = 2;
 
-/// Function provides incremetation for specific variable, if not exist, is created
-/// and setted to zero +1 == +1
+/// Function provides incremetation for specific variable by value, if not exist, is created
+/// and setted to zero + secondArgumentValue
 ClassMethod RunCommand(cmdPipeline As %List) As %String
 {
 	set status =""
 	if ($DATA(^data($LIST(cmdPipeline,2)))){
-		set ^data($LIST(cmdPipeline,2)) = $increment(^data($LIST(cmdPipeline,2)))
-		set status ="(integer) "_^data($LIST(cmdPipeline,2))
+		
+		try{
+		     set res = $INUMBER($LIST(cmdPipeline,3),"")
+		     if ('$FIND($LIST(cmdPipeline,3),".")){
+	          		set ^data($LIST(cmdPipeline,2)) = ^data($LIST(cmdPipeline,2)) - $LIST(cmdPipeline,3)
+	          		set status ="(integer) "_^data($LIST(cmdPipeline,2))
+		     }else{
+		          //"variable is number but no integer"
+		          set status = ##class(REDIS.Terminal.ErrorHandler).NotNumberNotInteger()
+		     }
+		}catch(e){
+		     //"variable is not number"
+		     set status = ##class(REDIS.Terminal.ErrorHandler).NotNumberNotInteger() 
+		}
+		
 	}else{
-		set list = $LB("SET",$LIST(cmdPipeline,2),"1")
+		set list = $LB("SET",$LIST(cmdPipeline,2),-$LIST(cmdPipeline,3))
 		// needed to set variable if not exist
 		set status = ##class(REDIS.Commands.SET).RunCommand(list)
 		if (status = "OK"){
-			set status = "(integer) 1" 
-		} else{
-			set status = "Unexpected error in DECR command implementation"
+			set status = "(integer) "_^data($LIST(cmdPipeline,2))
 		}
 	}
 	return status
