@@ -10,24 +10,12 @@ ClassMethod RunCommand(cmdPipeline As %List) As %String
 	set numDeleted = 0
 	for i=2:1:($LL(cmdPipeline))
 	{
-		if ($DATA(^data($LIST(cmdPipeline,i)))){
-		
-			
-			// test if variable is not timed and should be killed in cleaner
-			if ($DATA(^data($LIST(cmdPipeline,i),"expires"))){
-			
-				set timeToExp = ^data($LIST(cmdPipeline,i),"expires")
-				
-				if ($LL(^cleaner(timeToExp))>1){
-					set index = $LF(^cleaner(timeToExp),$LIST(cmdPipeline,i))
-					set $list(^cleaner(timeToExp),index,index) = ""
-				}else{
-					kill ^cleaner(timeToExp)
-				}
-			}
-			kill ^data($LIST(cmdPipeline,i))
+		do ##class(REDIS.CommandsHandling.Functions).LockGlobal($LIST(cmdPipeline,i))
+		if (##class(REDIS.CommandsHandling.Functions).IsGlobal($LIST(cmdPipeline,i),1)){
+			do ##class(REDIS.CommandsHandling.Functions).RemoveGlobal($LIST(cmdPipeline,i))
 			set numDeleted = $increment(numDeleted)
 		}
+	   do ##class(REDIS.CommandsHandling.Functions).UnlockGlobal($LIST(cmdPipeline,i))
 	}
 	
 	return "(integer) "_numDeleted

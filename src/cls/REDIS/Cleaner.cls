@@ -9,9 +9,12 @@ ClassMethod CleanUp()
 	while (time '= "") {
 	  if (..GetHangTime() <= 0) {
 	  	for i=1:1:$listlength(^cleaner(time)){
+	  		do ##class(REDIS.CommandsHandling.Functions).LockGlobal($LIST(^cleaner(time),i))
 	  		set varName = $LIST(^cleaner(time),i)
 	  		kill ^data(varName)
+	  		do ##class(REDIS.CommandsHandling.Functions).UnlockGlobal(varName)
 	  	}
+	  	
 	  	kill ^cleaner(time)
 	  }
 	  else{
@@ -20,6 +23,8 @@ ClassMethod CleanUp()
 	  set time = $order(^cleaner(""))
 	}
 }
+
+// Function only for cleaner to get time when next key should expire
 
 ClassMethod GetHangTime() As %String
 {
@@ -37,15 +42,11 @@ ClassMethod GetHangTime() As %String
 	} else{
 		return 999999999999999999
 	}
-	
-	//w timeLeftToLive
 }
 
 ClassMethod Run()
 {
 
- //	do ##class(%Device).ReDirectIO($$$YES)
-	//do $System.Util.SetInterruptEnable($$$YES) 
  // save PID of this job to good known global
  set ^cleanerPid = $JOB
  set var = 0
@@ -58,18 +59,11 @@ ClassMethod Run()
 	      do ..CleanUp()
 	      set sleepTime = ..GetHangTime()
 	    }
-	    hang sleepTime // Caché can hang for 0.5 as well as for 1 or 2
-	    /*
-	    hang 5
-	    set var = var + 1
-	    set ^inLoopDebug = var
-	    */
+	    hang sleepTime
 	      
 	  } catch (e) {
-
 	  	set ^debug = e	  	
 	    // todo: e = <INTERRUPT> error?
-	    // wow, I'm interrupted! Just do nothing, next loop
 	  }
 	}
 }

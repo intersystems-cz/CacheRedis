@@ -2,7 +2,7 @@ Class REDIS.CommandsHandling.CommandsHandler Extends %Persistent
 {
 
 /// Method for calling command that is part of cmdPipeline list, where first is needed
-///  to resolve if expression is correct as far as command with parameters count
+///  to resolve if expression is correct as far as command with parameters count.
 ClassMethod SolveExpression(cmdPipeline As %List) As %String
 {
 	set result = ""

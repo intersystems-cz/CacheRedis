@@ -9,9 +9,11 @@ ClassMethod RunCommand(cmdPipeline As %List) As %String
 
 	set result = ""
 	
-	if ( $DATA(^data($LIST(cmdPipeline,2))) '= 0 ){
-		if ( $DATA(^data($LIST(cmdPipeline,2),"expires")) '= 0 ){
-			   if ( ..GetLeftTimeToLive($LIST(cmdPipeline,2)) > 0 ){		
+	do ##class(REDIS.CommandsHandling.Functions).LockGlobal($LIST(cmdPipeline,2))
+	
+	if ( ##class(REDIS.CommandsHandling.Functions).IsGlobal($LIST(cmdPipeline,2),1) '= 0 ){
+		if ( ##class(REDIS.CommandsHandling.Functions).IsGlobal($LIST(cmdPipeline,2),2) '= 0 ){
+			   if ( ##class(REDIS.CommandsHandling.Functions).GetLeftTimeToLive($LIST(cmdPipeline,2)) > 0 ){		
 				set result = "(integer) 1"
 			   } else{
 				set result = "(integer) 0"
@@ -23,22 +25,9 @@ ClassMethod RunCommand(cmdPipeline As %List) As %String
 	   set result = "(integer) 0"
 	}
 	
+	do ##class(REDIS.CommandsHandling.Functions).UnlockGlobal($LIST(cmdPipeline,2))
+	
 	return result
-}
-
-ClassMethod GetLeftTimeToLive(varName As %String) As %String
-{
-
-		set actualTime = $NOW()
-		set dateval = $PIECE(actualTime,",",1)
-		set timeval = $PIECE(actualTime,",",2)
-		
-		// numberOfDays * numberOfHoursAday * numberOfSecondsAHour
-		set actualTimeInSec = dateval*24*3600 + timeval
-				
-		set timeLeftToLive = ^data(varName,"expires") - actualTimeInSec
-		
-		return timeLeftToLive
 }
 
 ClassMethod GetHelp() As %String

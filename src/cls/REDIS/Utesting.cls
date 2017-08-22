@@ -440,15 +440,15 @@ Method TestPttl()
 	 
 	 do $$$AssertEquals($length(##class(REDIS.Shell).Execute("PTTL test")) = 16 ,1, "Test PTTL on existing timed variable")
 	 
-	 HANG 1
+	 HANG 1.5
 	 
 	 do $$$AssertEquals($length(##class(REDIS.Shell).Execute("PTTL test")) = 15,1, "Test PTTL on existing timed variable")
 	 
 	 if ('isRunning)
 	 {
 	 	do ##class(REDIS.OnStartJobs).EndJobCleaner()
-	 }
-	 
+	 } 
+	 	 
 	 if ($DATA(temp)) {
 	 	s ^data("test") = temp
 	 	kill ^data("test","expires")

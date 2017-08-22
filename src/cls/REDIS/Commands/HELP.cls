@@ -73,31 +73,7 @@ ClassMethod GetHelp() As %String
 	}
 	
 	set helpUsage = helpUsage_$char(27)_"[0m"_$CHAR(10,13)
-	
-	
-	// test
-	/*
-  w !,"JUST TESTING",!
-  
-  	/// GET ALL COMPILED CLASSES FROM PACKAGE: Commands	
-	&sql(select LIST(id) into :classesList from %Dictionary.CompiledClass where
-	id LIKE 'REDIS.Commands.%' AND id not like 'REDIS.Commands.HELP' ORDER BY id ASC)
-			
-	set classesList = $LISTFROMSTRING(classesList)
-	
-	w $ll(classesList),!
-	
-	for i=1:1:$ll(classesList)
-	{
-	w "Test HELP of command "_$PIECE($LIST(classesList,i),".",3)_" returning string longer than 50 chars",!
-	w $LIST(classesList,i),!
-	 set result = $CLASSMETHOD($LIST(classesList,i), "GetHelp")	 
-	 //do $$$AssertEquals($length(result) > 50,1, "Test HELP of command "_$PIECE($LIST(className,i),".",3)_" returning string longer than 50 chars")
-	}
-	
-	 w !,"JUST TESTING",!
-	 */
-					
+				
 	return helpUsage
 }
 

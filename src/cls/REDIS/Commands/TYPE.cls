@@ -15,10 +15,11 @@ ClassMethod RunCommand(cmdPipeline As %List) As %String
 	// for those commands as follows: - list in list, with first member record data that will determine the type
 	// I need to study more redis structures as: list, set, zset and hash
 	
+	do ##class(REDIS.CommandsHandling.Functions).LockGlobal($LIST(cmdPipeline,2))
 	
-	if ($DATA(^data($LIST(cmdPipeline,2)))){
-		if ($DATA(^data($LIST(cmdPipeline,2),"type"))){
-			s result = ^data($LIST(cmdPipeline,2),"type")
+	if (##class(REDIS.CommandsHandling.Functions).IsGlobal($LIST(cmdPipeline,2),1)){
+		if (##class(REDIS.CommandsHandling.Functions).IsGlobal($LIST(cmdPipeline,2),3)){
+			s result = ##class(REDIS.CommandsHandling.Functions).IsGlobal($LIST(cmdPipeline,2),3)
 		} else{
 			set result = """string"""
 		}
@@ -26,6 +27,7 @@ ClassMethod RunCommand(cmdPipeline As %List) As %String
 		set result = """none"""
 	}
 	
+	do ##class(REDIS.CommandsHandling.Functions).UnlockGlobal($LIST(cmdPipeline,2))
 	
 	return result
 }

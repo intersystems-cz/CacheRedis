@@ -8,27 +8,29 @@ ClassMethod RunCommand(cmdPipeline As %List) As %String
 {
 	set result = ""
 	
-	// 	L +(^data($LIST(cmdPipeline,2))):0
+	do ##class(REDIS.CommandsHandling.Functions).LockGlobal($LIST(cmdPipeline,2))
 	
-	if ($DATA(^data($LIST(cmdPipeline,2)))){
+	if (##class(REDIS.CommandsHandling.Functions).IsGlobal($LIST(cmdPipeline,2),1)){
 	
 		// test condition if type of variable is string, if no "type" subscript exist, then it is string
-		if ($DATA(^data($LIST(cmdPipeline,2),"type")) = 0){
+		if (##class(REDIS.CommandsHandling.Functions).IsGlobal($LIST(cmdPipeline,2),3) = 0){
 			set ^data($LIST(cmdPipeline,2)) = ^data($LIST(cmdPipeline,2))_$LIST(cmdPipeline,3)
-			set result =  $classmethod("REDIS.Commands.STRLEN","RunCommand",cmdPipeline)
+			set result = "(integer) "_##class(REDIS.CommandsHandling.Functions).GetStrlen($LIST(cmdPipeline,2))
 		}else{
 			// TODO set result = error Message of wrong type
 		}
 		
 	}else{
-		set result = $classmethod("REDIS.Commands.SET","RunCommand",cmdPipeline)
+		set result = ##class(REDIS.CommandsHandling.Functions).SetVariable($LIST(cmdPipeline,2),$LIST(cmdPipeline,3))
 		if (result = "OK"){
-			set result = $classmethod("REDIS.Commands.STRLEN","RunCommand",cmdPipeline)
+			set result = "(integer) "_##class(REDIS.CommandsHandling.Functions).GetStrlen($LIST(cmdPipeline,2))
 		}else{
 			// TODO
 			w "special situation - append command else TODO",!
 		}
 	}
+	
+	do ##class(REDIS.CommandsHandling.Functions).UnlockGlobal($LIST(cmdPipeline,2))
 	
 	
 	return result

@@ -8,12 +8,13 @@ Parameter maxParameters = 1;
 /// TODO LIST,SET,ZSET,HASH
 ClassMethod RunCommand(cmdPipeline As %List) As %String
 {
-	if ($DATA(^data($LIST(cmdPipeline,2)))){
-	  s varDataLength = $length(^data($LIST(cmdPipeline,2)))
-	  s result = "(integer) "_varDataLength
+	do ##class(REDIS.CommandsHandling.Functions).LockGlobal($LIST(cmdPipeline,2))
+	if (##class(REDIS.CommandsHandling.Functions).IsGlobal($LIST(cmdPipeline,2),1)){
+	  s result = "(integer) "_##class(REDIS.CommandsHandling.Functions).GetStrlen($LIST(cmdPipeline,2))
 	}else{
 	  s result = "(integer) 0"
 	}
+	do ##class(REDIS.CommandsHandling.Functions).UnlockGlobal($LIST(cmdPipeline,2))
 	
 	QUIT result
 }

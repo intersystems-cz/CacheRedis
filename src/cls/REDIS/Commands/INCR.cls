@@ -8,19 +8,24 @@ Parameter maxParameters = 1;
 ClassMethod RunCommand(cmdPipeline As %List) As %String
 {
 	set status =""
-	if ($DATA(^data($LIST(cmdPipeline,2)))){
-		set ^data($LIST(cmdPipeline,2)) = $increment(^data($LIST(cmdPipeline,2)))
-		set status ="(integer) "_^data($LIST(cmdPipeline,2))
+	
+	do ##class(REDIS.CommandsHandling.Functions).LockGlobal($LIST(cmdPipeline,2))
+	
+	if (##class(REDIS.CommandsHandling.Functions).IsGlobal($LIST(cmdPipeline,2),1)){
+		do ##class(REDIS.CommandsHandling.Functions).IncreaseBy($LIST(cmdPipeline,2),1)
+		set status ="(integer) "_##class(REDIS.CommandsHandling.Functions).GetData($LIST(cmdPipeline,2))
 	}else{
-		set list = $LB("SET",$LIST(cmdPipeline,2),"1")
 		// needed to set variable if not exist
-		set status = ##class(REDIS.Commands.SET).RunCommand(list)
+		set status = ##class(REDIS.CommandsHandling.Functions).SetVariable($LIST(cmdPipeline,2),"1")
 		if (status = "OK"){
 			set status = "(integer) 1" 
 		} else{
 			set status = "Unexpected error in DECR command implementation"
 		}
 	}
+	
+	do ##class(REDIS.CommandsHandling.Functions).UnlockGlobal($LIST(cmdPipeline,2))
+	
 	return status
 }
 

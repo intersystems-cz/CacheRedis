@@ -8,13 +8,14 @@ ClassMethod RunCommand(cmdPipeline As %List) As %String
 {
 	set result = ""
 	
+	do ##class(REDIS.CommandsHandling.Functions).LockGlobal($LIST(cmdPipeline,2))
 	
-	if ($DATA(^data($LIST(cmdPipeline,2)))){
+	if (##class(REDIS.CommandsHandling.Functions).IsGlobal($LIST(cmdPipeline,2),1)){
 			/// test if variable exist as expire variable
-		if ($DATA(^data($LIST(cmdPipeline,2),"expires")) '= 0 ){
+		if (##class(REDIS.CommandsHandling.Functions).IsGlobal($LIST(cmdPipeline,2),2) '= 0 ){
 		
-			   set value = ^data($LIST(cmdPipeline,2))
-			   set lttl = ..GetLeftTimeToLive($LIST(cmdPipeline,2))
+			   set value = ##class(REDIS.CommandsHandling.Functions).GetData($LIST(cmdPipeline,2))
+			   set lttl =  ##class(REDIS.CommandsHandling.Functions).GetLeftTimeToLive($LIST(cmdPipeline,2))
 
 			   if ( lttl > 0 && $DATA(value)){
 			   
@@ -31,6 +32,8 @@ ClassMethod RunCommand(cmdPipeline As %List) As %String
 	}else{
 		set result = "(integer) -2"
 	}
+	
+	do ##class(REDIS.CommandsHandling.Functions).UnlockGlobal($LIST(cmdPipeline,2))
 	
 	return result
 }
