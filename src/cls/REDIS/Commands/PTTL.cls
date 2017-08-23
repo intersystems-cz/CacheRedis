@@ -4,6 +4,9 @@ Class REDIS.Commands.PTTL Extends REDIS.CommandsHandling.CommandPrescribtion [ A
 /// constant max parameters
 Parameter maxParameters = 1;
 
+/// constant min parameters
+Parameter minParameters = 1;
+
 ClassMethod RunCommand(cmdPipeline As %List) As %String
 {
 	set result = ""
@@ -25,9 +28,7 @@ ClassMethod RunCommand(cmdPipeline As %List) As %String
 				set result = "(integer) -2"
 			   }
 		}else {
-		
 			set result = "(integer) -1"
-			
 		}
 	}else{
 		set result = "(integer) -2"

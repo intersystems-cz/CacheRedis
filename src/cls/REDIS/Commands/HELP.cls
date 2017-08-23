@@ -4,6 +4,9 @@ Class REDIS.Commands.HELP Extends REDIS.CommandsHandling.CommandPrescribtion
 /// constant max parameters
 Parameter maxParameters = 1;
 
+/// constant min parameters
+Parameter minParameters = 0;
+
 ClassMethod RunCommand(cmdPipeline As %List) As %String
 {
 	
@@ -17,12 +20,7 @@ ClassMethod RunCommand(cmdPipeline As %List) As %String
 	else{
 		set className = "REDIS.Commands."_$ZCONVERT($LIST(cmdPipeline,2),"U")
 				
-		/// GET ALL COMPILED CLASSES FROM PACKAGE: Commands 	
-		/*
-		&sql(select LIST(id) into :classesList from %Dictionary.CompiledClass where
-		id LIKE 'REDIS.Commands.%' AND id NOT LIKE 'REDIS.Commands.HELP' AND id = :className)
-		*/
-		
+		/// GET ALL COMPILED CLASSES FROM PACKAGE: Commands 			
 		&sql(select LIST(id) into :classesList from (
 			select id as id from %Dictionary.CompiledClass where
 			id LIKE 'REDIS.Commands.%' AND id NOT LIKE 'REDIS.Commands.HELP'

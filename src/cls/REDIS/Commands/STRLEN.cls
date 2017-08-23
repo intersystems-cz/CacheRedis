@@ -4,6 +4,9 @@ Class REDIS.Commands.STRLEN Extends REDIS.CommandsHandling.CommandPrescribtion [
 /// constant max parameters
 Parameter maxParameters = 1;
 
+/// constant min parameters
+Parameter minParameters = 1;
+
 /// The different types that can be returned are: string, list, set, zset and hash.
 /// TODO LIST,SET,ZSET,HASH
 ClassMethod RunCommand(cmdPipeline As %List) As %String

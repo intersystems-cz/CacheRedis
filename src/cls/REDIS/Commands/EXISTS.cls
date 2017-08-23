@@ -3,6 +3,9 @@ Class REDIS.Commands.EXISTS Extends REDIS.CommandsHandling.CommandPrescribtion [
 
 Parameter maxParameters = 1;
 
+/// constant min parameters
+Parameter minParameters = 1;
+
 /// Method for returning value setted under specific key
 ClassMethod RunCommand(cmdPipeline As %List) As %String
 {

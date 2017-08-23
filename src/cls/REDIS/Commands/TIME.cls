@@ -2,7 +2,10 @@ Class REDIS.Commands.TIME Extends REDIS.CommandsHandling.CommandPrescribtion [ A
 {
 
 /// constant max parameters
-Parameter maxParameters = 1;
+Parameter maxParameters = 0;
+
+/// constant min parameters
+Parameter minParameters = 0;
 
 ClassMethod RunCommand(cmdPipeline As %List) As %String
 {

@@ -4,6 +4,9 @@ Class REDIS.Commands.APPEND Extends REDIS.CommandsHandling.CommandPrescribtion [
 /// constant max parameters
 Parameter maxParameters = 2;
 
+/// constant min parameters
+Parameter minParameters = 2;
+
 ClassMethod RunCommand(cmdPipeline As %List) As %String
 {
 	set result = ""
@@ -17,7 +20,7 @@ ClassMethod RunCommand(cmdPipeline As %List) As %String
 			set ^data($LIST(cmdPipeline,2)) = ^data($LIST(cmdPipeline,2))_$LIST(cmdPipeline,3)
 			set result = "(integer) "_##class(REDIS.CommandsHandling.Functions).GetStrlen($LIST(cmdPipeline,2))
 		}else{
-			// TODO set result = error Message of wrong type
+			set result = ##class(REDIS.Terminal.ErrorHandler).WrongTypeError()
 		}
 		
 	}else{
@@ -25,8 +28,7 @@ ClassMethod RunCommand(cmdPipeline As %List) As %String
 		if (result = "OK"){
 			set result = "(integer) "_##class(REDIS.CommandsHandling.Functions).GetStrlen($LIST(cmdPipeline,2))
 		}else{
-			// TODO
-			w "special situation - append command else TODO",!
+			// nothing more, just result consist of error message that will be returned
 		}
 	}
 	

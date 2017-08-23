@@ -17,14 +17,19 @@ ClassMethod SolveExpression(cmdPipeline As %List) As %String
 	
 	if ($LISTLENGTH(classesList) '= 0){
 		set maxParameters = $PARAMETER(classFunction,"maxParameters")
+		set minParameters = $PARAMETER(classFunction,"minParameters")
 		///test number of parameters
 		if (($LISTLENGTH(cmdPipeline)-1) > maxParameters){
 		
 			set result = ##class(REDIS.Terminal.ErrorHandler).ParamExceeded(cmdPipeline, maxParameters)
 		
 		}else{
-			/// function exist and call it
-			set result = $CLASSMETHOD(classFunction,"RunCommand",cmdPipeline)
+			if (($LISTLENGTH(cmdPipeline)-1) < minParameters){
+				set result = ##class(REDIS.Terminal.ErrorHandler).ParamExceeded(cmdPipeline, maxParameters)				
+			}else{
+				/// function exist and call it
+				set result = $CLASSMETHOD(classFunction,"RunCommand",cmdPipeline)			
+			}
 		}
 	}
 	else{

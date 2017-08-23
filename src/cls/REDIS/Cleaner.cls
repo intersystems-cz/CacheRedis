@@ -1,3 +1,5 @@
+Include REDIS.settings
+
 /// This class contain ClassMethods for JOB Cleaner 
 /// that cleans all outdated Redis variables.
 Class REDIS.Cleaner Extends %Persistent
@@ -5,22 +7,23 @@ Class REDIS.Cleaner Extends %Persistent
 
 ClassMethod CleanUp()
 {
-	set time = $order(^cleaner(""))
+		
+	s time = $O(@("^"_$$$CLEANER_"("""")"))
 	while (time '= "") {
 	  if (..GetHangTime() <= 0) {
-	  	for i=1:1:$listlength(^cleaner(time)){
-	  		do ##class(REDIS.CommandsHandling.Functions).LockGlobal($LIST(^cleaner(time),i))
-	  		set varName = $LIST(^cleaner(time),i)
-	  		kill ^data(varName)
-	  		do ##class(REDIS.CommandsHandling.Functions).UnlockGlobal(varName)
+	  	for i=1:1:$LL(@("^"_$$$CLEANER_"("""_time_""")")){
+	  		do ##class(REDIS.CommandsHandling.Functions).LockGlobal($LI(@("^"_$$$CLEANER_"("""_time_""")"),i))
+	  		s globalName = $LI(@("^"_$$$CLEANER_"("""_time_""")"),i)
+	  		k @("^"_$$$DATA_"("""_globalName_""")")
+	  		do ##class(REDIS.CommandsHandling.Functions).UnlockGlobal(globalName)
 	  	}
 	  	
-	  	kill ^cleaner(time)
+	  	k @("^"_$$$CLEANER_"("""_time_""")")
 	  }
 	  else{
-	  	break
+	  	b
 	  }
-	  set time = $order(^cleaner(""))
+	  s time = $O(@("^"_$$$CLEANER_"("""")"))
 	}
 }
 
@@ -29,18 +32,18 @@ ClassMethod CleanUp()
 ClassMethod GetHangTime() As %String
 {
 	
-	if ( $order(^cleaner("")) '= "") {
-		set actualTime = $NOW()
-		set dateval = $PIECE(actualTime,",",1)
-		set timeval = $PIECE(actualTime,",",2)
+	if ( $O(@("^"_$$$CLEANER_"("""")")) '= "") {
+		s actualTime = $NOW()
+		s dateval = $P(actualTime,",",1)
+		s timeval = $P(actualTime,",",2)
 		// numberOfDays * numberOfHoursAday * numberOfSecondsAHour
-		set actualTimeInSec = dateval*24*3600 + timeval		
-		set timeLeftToLive = $order(^cleaner("")) - actualTimeInSec
+		s actualTimeInSec = dateval*24*3600 + timeval		
+		s timeLeftToLive = $O(@("^"_$$$CLEANER_"("""")")) - actualTimeInSec
 		
-		return timeLeftToLive
+		ret timeLeftToLive
 		
 	} else{
-		return 999999999999999999
+		ret 999999999999999999
 	}
 }
 
@@ -48,21 +51,20 @@ ClassMethod Run()
 {
 
  // save PID of this job to good known global
- set ^cleanerPid = $JOB
- set var = 0
+ s @("^"_$$$CLEANERPID) = $J
 
 	while 1 { // loop forever
 	do $System.Util.SetInterruptEnable($$$YES)
 	  try {
-	    set sleepTime = ..GetHangTime()
+	    s sleepTime = ..GetHangTime()
 	    while (sleepTime <= 0) {
 	      do ..CleanUp()
-	      set sleepTime = ..GetHangTime()
+	      s sleepTime = ..GetHangTime()
 	    }
-	    hang sleepTime
+	    h sleepTime
 	      
 	  } catch (e) {
-	  	set ^debug = e	  	
+	  	s ^debug = e	  	
 	    // todo: e = <INTERRUPT> error?
 	  }
 	}

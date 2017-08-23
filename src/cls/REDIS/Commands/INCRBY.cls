@@ -3,6 +3,9 @@ Class REDIS.Commands.INCRBY Extends REDIS.CommandsHandling.CommandPrescribtion [
 
 Parameter maxParameters = 2;
 
+/// constant min parameters
+Parameter minParameters = 2;
+
 /// Function provides incremetation for specific variable by value, if not exist, is created
 /// and setted to zero + secondArgumentValue
 ClassMethod RunCommand(cmdPipeline As %List) As %String
@@ -11,33 +14,27 @@ ClassMethod RunCommand(cmdPipeline As %List) As %String
 
 	do ##class(REDIS.CommandsHandling.Functions).LockGlobal($LIST(cmdPipeline,2))
 
-	// integer / number check - maybe TODO reimplement
-	try{
-	     set res = $INUMBER($LIST(cmdPipeline,3),"")
-	     if ($FIND($LIST(cmdPipeline,3),".")){
-	          //"variable is number but no integer"
-	          set status = ##class(REDIS.Terminal.ErrorHandler).NotNumberNotInteger()
-	     }
-	     
-	}catch(e){
-	     //"variable is not number"
-	     set status = ##class(REDIS.Terminal.ErrorHandler).NotNumberNotInteger() 
-	}
-	
-	if (status = ""){
-		if (##class(REDIS.CommandsHandling.Functions).IsGlobal($LIST(cmdPipeline,2),1)){ 
-			
+	if (##class(REDIS.CommandsHandling.Functions).IsGlobal($LIST(cmdPipeline,2),1)){ 
+			// test on number and integer, 
+		if (##class(REDIS.CommandsHandling.Functions).IsRedisNumber($LIST(cmdPipeline,2),1) && 
+		##class(REDIS.CommandsHandling.Functions).IsRedisNumber($LIST(cmdPipeline,3),0)){
 	        do ##class(REDIS.CommandsHandling.Functions).IncreaseBy($LIST(cmdPipeline,2),$LIST(cmdPipeline,3))
       		set status ="(integer) "_##class(REDIS.CommandsHandling.Functions).GetData($LIST(cmdPipeline,2))
-			
-		}else{
+  		}else{
+  			set status = ##class(REDIS.Terminal.ErrorHandler).NotNumberNotInteger() 
+ 		}					
+	}else{
+		if (##class(REDIS.CommandsHandling.Functions).IsRedisNumber($LIST(cmdPipeline,3),0)){
 			// needed to set variable if not exist
 			set status = ##class(REDIS.CommandsHandling.Functions).SetVariable($LIST(cmdPipeline,2),$LIST(cmdPipeline,3))
 			if (status = "OK"){
 				set status = "(integer) "_##class(REDIS.CommandsHandling.Functions).GetData($LIST(cmdPipeline,2))
 			}
+		}else{
+  			set status = ##class(REDIS.Terminal.ErrorHandler).NotNumberNotInteger()
 		}
 	}
+	
 	
 	do ##class(REDIS.CommandsHandling.Functions).UnlockGlobal($LIST(cmdPipeline,2))
 	

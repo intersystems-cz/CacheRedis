@@ -4,6 +4,9 @@ Class REDIS.Commands.TTL Extends REDIS.CommandsHandling.CommandPrescribtion [ Ab
 /// constant max parameters
 Parameter maxParameters = 1;
 
+/// constant min parameters
+Parameter minParameters = 1;
+
 ClassMethod RunCommand(cmdPipeline As %List) As %String
 {
 	set result = ""

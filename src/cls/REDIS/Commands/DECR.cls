@@ -3,6 +3,9 @@ Class REDIS.Commands.DECR Extends REDIS.CommandsHandling.CommandPrescribtion [ A
 
 Parameter maxParameters = 1;
 
+/// constant min parameters
+Parameter minParameters = 1;
+
 /// Function provides decremetation for specific variable, if not exist, is created
 /// and setted to zero -1 == -1
 ClassMethod RunCommand(cmdPipeline As %List) As %String
@@ -12,16 +15,21 @@ ClassMethod RunCommand(cmdPipeline As %List) As %String
 	do ##class(REDIS.CommandsHandling.Functions).LockGlobal($LIST(cmdPipeline,2))
 	
 	if (##class(REDIS.CommandsHandling.Functions).IsGlobal($LIST(cmdPipeline,2),1)){
-		do ##class(REDIS.CommandsHandling.Functions).DecreaseBy($LIST(cmdPipeline,2),1)
-		set status ="(integer) "_##class(REDIS.CommandsHandling.Functions).GetData($LIST(cmdPipeline,2))
+		
+		// test on number and integer, 
+		if (##class(REDIS.CommandsHandling.Functions).IsRedisNumber($LIST(cmdPipeline,2),1)){
+				do ##class(REDIS.CommandsHandling.Functions).DecreaseBy($LIST(cmdPipeline,2),1)
+				set status ="(integer) "_##class(REDIS.CommandsHandling.Functions).GetData($LIST(cmdPipeline,2))
+		}else{
+		 	set status = ##class(REDIS.Terminal.ErrorHandler).NotNumberNotInteger() 
+		}
 	}else{
-
 		// needed to set variable if not exist
 		set status = ##class(REDIS.CommandsHandling.Functions).SetVariable($LIST(cmdPipeline,2),"-1")
 		if (status = "OK"){
 			set status = "(integer) -1" 
 		} else{
-			set status = "Unexpected error in DECR command implementation"
+			// error is returned in status
 		}
 	}
 	

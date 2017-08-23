@@ -4,6 +4,9 @@ Class REDIS.Commands.DEL Extends REDIS.CommandsHandling.CommandPrescribtion
 /// constant max parameters - infinity parameters
 Parameter maxParameters = 99999999;
 
+/// constant min parameters
+Parameter minParameters = 1;
+
 /// Delete specific amount of variables
 ClassMethod RunCommand(cmdPipeline As %List) As %String
 {

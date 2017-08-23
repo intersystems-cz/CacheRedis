@@ -1,3 +1,5 @@
+Include REDIS.settings
+
 Class REDIS.Utesting Extends %UnitTest.TestCase
 {
 

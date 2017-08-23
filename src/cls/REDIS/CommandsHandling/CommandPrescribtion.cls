@@ -5,6 +5,9 @@ Class REDIS.CommandsHandling.CommandPrescribtion [ Abstract ]
 /// constant max parameters
 Parameter maxParameters;
 
+/// constant min parameters
+Parameter minParameters;
+
 /// By calling this method the main routine of command for specific function should run
 ClassMethod RunCommand(cmdPipeline As %List) As %String [ Abstract ]
 {

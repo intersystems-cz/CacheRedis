@@ -13,17 +13,14 @@ ClassMethod RunCommand(cmdPipeline As %List) As %String
 	if (##class(REDIS.CommandsHandling.Functions).IsGlobal($LIST(cmdPipeline,2),1)){
 			/// test if variable exist as expire variable
 		if (##class(REDIS.CommandsHandling.Functions).IsGlobal($LIST(cmdPipeline,2),2) '= 0 ){
-			//kill ^cleaner(^data($LIST(cmdPipeline,2),"expires"))
-			//kill ^data($LIST(cmdPipeline,2))
+
 			   set value = ##class(REDIS.CommandsHandling.Functions).GetData($LIST(cmdPipeline,2))
 
 			   if (  ##class(REDIS.CommandsHandling.Functions).GetLeftTimeToLive($LIST(cmdPipeline,2)) > 0 && $DATA(value)){
-			   
-			   		set num = $LIST(cmdPipeline,3)		
 						
 					// TODO TEST IF seconds($LIST(cmdPipeline,3)) is NUMBER, 
 					// redis allows even 00023 format interpreted as 23s
-					if ($isvalidnum(num)&&(+num\1=+num)) {
+					if (##class(REDIS.CommandsHandling.Functions).IsRedisNumber($LIST(cmdPipeline,3),0)) {
 										
 					 	s globalValue = ##class(REDIS.CommandsHandling.Functions).GetData($LIST(cmdPipeline,2))
 						do ##class(REDIS.CommandsHandling.Functions).SetTimedVariable($LIST(cmdPipeline,2),globalValue,($LIST(cmdPipeline,3)/1000))
@@ -43,10 +40,8 @@ ClassMethod RunCommand(cmdPipeline As %List) As %String
 			   }
 		}else {
 		
-			set value = ##class(REDIS.CommandsHandling.Functions).GetData($LIST(cmdPipeline,2))
-			set num = $LIST(cmdPipeline,3)		
-			
-			if ($isvalidnum(num)&&(+num\1=+num)) {	
+			// redis allows even 00023 format interpreted as 23s
+			if (##class(REDIS.CommandsHandling.Functions).IsRedisNumber($LIST(cmdPipeline,3),0)) {
 					 
 			 	s globalValue = ##class(REDIS.CommandsHandling.Functions).GetData($LIST(cmdPipeline,2))
 				do ##class(REDIS.CommandsHandling.Functions).SetTimedVariable($LIST(cmdPipeline,2),globalValue,($LIST(cmdPipeline,3)/1000))

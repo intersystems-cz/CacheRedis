@@ -3,6 +3,9 @@ Class REDIS.Commands.GET Extends REDIS.CommandsHandling.CommandPrescribtion [ Ab
 
 Parameter maxParameters = 1;
 
+/// constant min parameters
+Parameter minParameters = 1;
+
 /// Method for returning value setted under specific key
 ClassMethod RunCommand(cmdPipeline As %List) As %String
 {

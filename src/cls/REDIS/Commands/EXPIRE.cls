@@ -4,6 +4,9 @@ Class REDIS.Commands.EXPIRE Extends REDIS.CommandsHandling.CommandPrescribtion [
 /// constant max parameters
 Parameter maxParameters = 2;
 
+/// constant min parameters
+Parameter minParameters = 2;
+
 ClassMethod RunCommand(cmdPipeline As %List) As %String
 {
 	set result = ""
@@ -17,13 +20,10 @@ ClassMethod RunCommand(cmdPipeline As %List) As %String
 			   set value = ##class(REDIS.CommandsHandling.Functions).GetData($LIST(cmdPipeline,2))
 
 			   if ( ##class(REDIS.CommandsHandling.Functions).GetLeftTimeToLive($LIST(cmdPipeline,2)) > 0 && $DATA(value))
-			   {
-			   
-			   		set num = $LIST(cmdPipeline,3)		
-						
+			   {		
 					// TEST IF seconds($LIST(cmdPipeline,3)) is NUMBER, 
 					// redis allows even 00023 format interpreted as 23s
-					if ($isvalidnum(num)&&(+num\1=+num)) {
+					if (##class(REDIS.CommandsHandling.Functions).IsRedisNumber($LIST(cmdPipeline,3),0)) {
 				 	
 					 	s globalValue = ##class(REDIS.CommandsHandling.Functions).GetData($LIST(cmdPipeline,2))
 						do ##class(REDIS.CommandsHandling.Functions).SetTimedVariable($LIST(cmdPipeline,2),globalValue,$LIST(cmdPipeline,3))
@@ -34,7 +34,7 @@ ClassMethod RunCommand(cmdPipeline As %List) As %String
 						set result = "(integer) 1"
 					  
 					} else {
-					 set result = ##class(REDIS.Terminal.ErrorHandler).NotNumber(cmdPipeline)
+					 set result = ##class(REDIS.Terminal.ErrorHandler).NotNumberNotInteger()
 					}
 
 					
@@ -43,13 +43,12 @@ ClassMethod RunCommand(cmdPipeline As %List) As %String
 			   }
 		}
 		else{
-		
-	   		set num = $LIST(cmdPipeline,3)		
-				
+
+				// TODO remove code duplication 
 			// TEST IF seconds($LIST(cmdPipeline,3)) is NUMBER, 
 			// redis allows even 00023 format interpreted as 23s
-			if ($isvalidnum(num)&&(+num\1=+num)) {
-			 	
+			if ( ##class(REDIS.CommandsHandling.Functions).IsRedisNumber($LIST(cmdPipeline,3),0)) {
+
 			 	s globalValue = ##class(REDIS.CommandsHandling.Functions).GetData($LIST(cmdPipeline,2))
 				do ##class(REDIS.CommandsHandling.Functions).SetTimedVariable($LIST(cmdPipeline,2),globalValue,$LIST(cmdPipeline,3))
 				
@@ -59,7 +58,7 @@ ClassMethod RunCommand(cmdPipeline As %List) As %String
 				set result = "(integer) 1"
 			  
 			} else {
-			 set result = ##class(REDIS.Terminal.ErrorHandler).NotNumber(cmdPipeline)
+			 set result = ##class(REDIS.Terminal.ErrorHandler).NotNumberNotInteger()
 			}
 		
 		}
