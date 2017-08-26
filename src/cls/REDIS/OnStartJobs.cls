@@ -6,13 +6,17 @@ Class REDIS.OnStartJobs Extends %Persistent
 /// Run JOB of variable removal = variable cleaner
 ClassMethod RunJobCleaner()
 {
-	JOB ##class(REDIS.Cleaner).Run()
+	if ('##class(REDIS.CommandsHandling.Functions).IsCleanerRunning()){
+		JOB ##class(REDIS.Cleaner).Run()
+	}
 }
 
 /// Kill JOB - cleaner
 ClassMethod EndJobCleaner()
 {
-	do ##class(%SYSTEM.Process).Terminate(^cleanerPid)
+	if ('##class(REDIS.CommandsHandling.Functions).IsCleanerRunning()){
+		do ##class(REDIS.CommandsHandling.Functions).KillCleaner()
+	}
 }
 
 /// Run all JOBs with one ClassMethod call

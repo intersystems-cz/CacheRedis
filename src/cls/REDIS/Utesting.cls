@@ -227,18 +227,7 @@ Method TestExpire()
 	 	kill ^data("test")
 	 }
 	 
-	 set pid = ""
-	 set isRunning = 0
-	 
-	 /// test if cleaner is running
-	 FOR i=1:1 { 
-	 	s pid=$ORDER(^$JOB(pid)) 
-	 	s JOB(i)=pid 
-	 	if (pid = ^cleanerPid){
-	 		s isRunning = 1
-	 	} 
-	 	QUIT:pid=""
-	 }
+	 s isRunning = ##class(REDIS.CommandsHandling.Functions).IsCleanerRunning()
 	 
 	 /// rerun cleaner
 	 if (isRunning){
@@ -284,18 +273,7 @@ Method TestPexpire()
 	 	kill ^data("test")
 	 }
 	 
-	 set pid = ""
-	 set isRunning = 0
-	 
-	 /// test if cleaner is running
-	 FOR i=1:1 { 
-	 	s pid=$ORDER(^$JOB(pid)) 
-	 	s JOB(i)=pid 
-	 	if (pid = ^cleanerPid){
-	 		s isRunning = 1
-	 	} 
-	 	QUIT:pid=""
-	 }
+	 set isRunning = ##class(REDIS.CommandsHandling.Functions).IsCleanerRunning()
 	 
 	 /// rerun cleaner
 	 if (isRunning){
@@ -341,18 +319,7 @@ Method TestTtl()
 	 	kill ^data("test")
 	 }
 	 
-	 set pid = ""
-	 set isRunning = 0
-	 
-	 /// test if cleaner is running
-	 FOR i=1:1 { 
-	 	s pid=$ORDER(^$JOB(pid)) 
-	 	s JOB(i)=pid 
-	 	if (pid = ^cleanerPid){
-	 		s isRunning = 1
-	 	} 
-	 	QUIT:pid=""
-	 }
+	 s isRunning = ##class(REDIS.CommandsHandling.Functions).IsCleanerRunning()
 	 
 	 /// rerun cleaner
 	 if (isRunning){
@@ -404,18 +371,7 @@ Method TestPttl()
 	 	kill ^data("test")
 	 }
 	 
-	 set pid = ""
-	 set isRunning = 0
-	 
-	 /// test if cleaner is running
-	 FOR i=1:1 { 
-	 	s pid=$ORDER(^$JOB(pid)) 
-	 	s JOB(i)=pid 
-	 	if (pid = ^cleanerPid){
-	 		s isRunning = 1
-	 	} 
-	 	QUIT:pid=""
-	 }
+	 s isRunning = ##class(REDIS.CommandsHandling.Functions).IsCleanerRunning()
 	 
 	 /// rerun cleaner
 	 if (isRunning){

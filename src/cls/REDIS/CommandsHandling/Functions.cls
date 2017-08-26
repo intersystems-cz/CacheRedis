@@ -169,9 +169,9 @@ ClassMethod IsGlobal(globalName As %String, option As %Integer) As %String
 /// option values:
 ///   0 == test value of given number stored under string
 ///   1 == test value stored in global under variable name
-ClassMethod IsRedisNumber(variable As %String, option As %Integer)
+ClassMethod IsRedisNumber(variable As %String, option As %Integer) As %Integer
 {
-	s result = "(undefined option with IsRedisNumber() Method in REDIS.CommandsHandling.Functions)"
+	s result = -1
 	if (option = 0){
 		s result = $isvalidnum(variable)&&(+variable\1=+variable) 
 	}elseif(option = 1){
@@ -180,6 +180,29 @@ ClassMethod IsRedisNumber(variable As %String, option As %Integer)
 	}
 	
 	ret result
+}
+
+/// Test if cleaner JOB PID exist
+ClassMethod IsCleanerRunning() As %Boolean
+{
+	s isRunning = 0
+	s pid=""
+	 FOR i=1:1 { 
+	 	s pid=$ORDER(^$JOB(pid)) 
+	 	s JOB(i)=pid 
+	 	if (pid = @("^"_$$$CLEANERPID)){
+	 		s isRunning = 1
+	 	} 
+	 	QUIT:pid=""
+	 }
+	
+	ret isRunning
+}
+
+/// Kill cleaner JOB running under cleanerPID
+ClassMethod KillCleaner()
+{
+	do ##class(%SYSTEM.Process).Terminate(@("^"_$$$CLEANERPID))
 }
 
 }

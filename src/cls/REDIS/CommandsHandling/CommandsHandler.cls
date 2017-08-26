@@ -25,6 +25,7 @@ ClassMethod SolveExpression(cmdPipeline As %List) As %String
 		
 		}else{
 			if (($LISTLENGTH(cmdPipeline)-1) < minParameters){
+				/// This is not fault, there needs to be maxParameters as in REDIS return error is.
 				set result = ##class(REDIS.Terminal.ErrorHandler).ParamExceeded(cmdPipeline, maxParameters)				
 			}else{
 				/// function exist and call it
