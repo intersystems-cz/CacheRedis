@@ -2,7 +2,7 @@ Class REDIS.Commands.SET Extends REDIS.CommandsHandling.CommandPrescribtion [ Ab
 {
 
 /// constant max parameters
-Parameter maxParameters = 4;
+Parameter maxParameters = 5;
 
 /// constant min parameters
 Parameter minParameters = -1;
@@ -27,57 +27,170 @@ ClassMethod RunCommand(cmdPipeline As %List) As %String
 		set result = ##class(REDIS.CommandsHandling.Functions).SetVariable($LIST(cmdPipeline,2),$LIST(cmdPipeline,3)) 
 	}
 	elseif (paramNum = 3){
-		
-		set option = $ZCONVERT($LIST(cmdPipeline,4),"U")		
-		/// if variable not exist, set it
-		if (option = "NX"){
-			if ('##class(REDIS.CommandsHandling.Functions).IsGlobal($LIST(cmdPipeline,2),1)){
-				set result = ##class(REDIS.CommandsHandling.Functions).SetVariable($LIST(cmdPipeline,2),$LIST(cmdPipeline,3))
-			}else{
-				set result = "(nil)"
-			}
-		}
-		/// if variable exist, implement it
-		elseif(option = "XX"){
-			if (##class(REDIS.CommandsHandling.Functions).IsGlobal($LIST(cmdPipeline,2),1)){
-				set result = ##class(REDIS.CommandsHandling.Functions).SetVariable($LIST(cmdPipeline,2),$LIST(cmdPipeline,3))
-			}else{
-				set result = "(nil)"
-			}
-		}
-		else{
-			set result = ##class(REDIS.Terminal.ErrorHandler).SyntaxError(" Option """_option_""" not exist, see ""help set""")
+		set result = ..TestNXandXX(cmdPipeline,4) 
+		if (result = "NotExist")
+		{
+			set result = ##class(REDIS.Terminal.ErrorHandler).SyntaxError(" ERR Syntax error ")
 		}
 	}
 	elseif (paramNum = 4){
+		set result = ..TestEXandPX(cmdPipeline,4) 
+		if (result = "NotExist")
+		{
+			set result = ##class(REDIS.Terminal.ErrorHandler).SyntaxError(" ERR Syntax error ")
+		}
+	}
+	elseif (paramNum = 5){
+		/// Very special state, 4 different semantic combination and 8 list place combinations.
+		/// EX val NX, EX val XX, PX val NX, PX val XX
+		s EX = 0, PX = 0, XX = 0, NX = 0
 		set option = $ZCONVERT($LIST(cmdPipeline,4),"U")
+		set option2 = $ZCONVERT($LIST(cmdPipeline,6),"U")
+		set option3 = $ZCONVERT($LIST(cmdPipeline,5),"U")
+		
+		if (option = "NX"){
+			s NX = 4
+		}
+		elseif(option2 = "NX"){
+			s NX = 6
+		}
+		elseif (option = "XX"){
+			s XX = 4
+		}
+		elseif (option2 = "XX"){
+			s XX = 6
+		}
+		else{
+			set result = ##class(REDIS.Terminal.ErrorHandler).SyntaxError(" ERR Syntax error ")
+		}
+		
+		if (result = ""){
+			if (option = "EX"){
+				s EX = 4
+			}
+			elseif(option3 = "EX"){
+				s EX = 5 
+			}
+			elseif (option = "PX"){
+				s PX = 4
+			}
+			elseif(option3 = "PX"){
+				s PX = 5
+			}
+			else{
+				set result = ##class(REDIS.Terminal.ErrorHandler).SyntaxError(" ERR Syntax error ")
+			}
+		}
+		
+		if (result = ""){
+			if (NX > 0){
+				if ('##class(REDIS.CommandsHandling.Functions).IsGlobal($LIST(cmdPipeline,2),1)){
+					if (EX > 0){
+						if (##class(REDIS.CommandsHandling.Functions).IsRedisNumber($LIST(cmdPipeline,(EX+1)),0)){
+							do ##class(REDIS.CommandsHandling.Functions).SetTimedVariable($LIST(cmdPipeline,2),$LIST(cmdPipeline,3),$LIST(cmdPipeline,(EX+1)))
+							set result = "OK"
+						}else{
+							set result = ##class(REDIS.Terminal.ErrorHandler).NotNumberNotInteger()
+						}	
+					}
+					elseif(PX > 0){
+						if (##class(REDIS.CommandsHandling.Functions).IsRedisNumber($LIST(cmdPipeline,(PX+1)),0)){
+							// conversion to miliseconds:
+							set $LIST(cmdPipeline,(PX+1)) = $LIST(cmdPipeline,(PX+1))/1000
+							do ##class(REDIS.CommandsHandling.Functions).SetTimedVariable($LIST(cmdPipeline,2),$LIST(cmdPipeline,3),$LIST(cmdPipeline,(PX+1)))
+							set result = "OK"
+						}else{
+							set result = ##class(REDIS.Terminal.ErrorHandler).NotNumberNotInteger()
+						}
+					}
+				}else{
+					set result = "(nil)"
+				}
+			}
+			elseif(XX > 0){
+				if (##class(REDIS.CommandsHandling.Functions).IsGlobal($LIST(cmdPipeline,2),1)){
+					if (EX > 0){
+						if (##class(REDIS.CommandsHandling.Functions).IsRedisNumber($LIST(cmdPipeline,(EX+1)),0)){
+							do ##class(REDIS.CommandsHandling.Functions).SetTimedVariable($LIST(cmdPipeline,2),$LIST(cmdPipeline,3),$LIST(cmdPipeline,(EX+1)))
+							set result = "OK"
+						}else{
+							set result = ##class(REDIS.Terminal.ErrorHandler).NotNumberNotInteger()
+						}	
+					}
+					elseif(PX > 0){
+						if (##class(REDIS.CommandsHandling.Functions).IsRedisNumber($LIST(cmdPipeline,(PX+1)),0)){
+							// conversion to miliseconds:
+							set $LIST(cmdPipeline,(PX+1)) = $LIST(cmdPipeline,(PX+1))/1000
+							do ##class(REDIS.CommandsHandling.Functions).SetTimedVariable($LIST(cmdPipeline,2),$LIST(cmdPipeline,3),$LIST(cmdPipeline,(PX+1)))
+							set result = "OK"
+						}else{
+							set result = ##class(REDIS.Terminal.ErrorHandler).NotNumberNotInteger()
+						}
+					}					
+				}else{
+					set result = "(nil)"
+				}
+			}
+		}		
+		
+	}
+	
+	do ##class(REDIS.CommandsHandling.Functions).UnlockGlobal($LIST(cmdPipeline,2))
+	
+	return result
+}
+
+ClassMethod TestNXandXX(cmdPipeline As %List, pos As %Integer) As %String
+{
+	set option = $ZCONVERT($LIST(cmdPipeline,pos),"U")		
+	/// if variable not exist, set it
+	if (option = "NX"){
+		if ('##class(REDIS.CommandsHandling.Functions).IsGlobal($LIST(cmdPipeline,2),1)){
+			set result = ##class(REDIS.CommandsHandling.Functions).SetVariable($LIST(cmdPipeline,2),$LIST(cmdPipeline,3))
+		}else{
+			set result = "(nil)"
+		}
+	}
+	/// if variable exist, implement it
+	elseif(option = "XX"){
+		if (##class(REDIS.CommandsHandling.Functions).IsGlobal($LIST(cmdPipeline,2),1)){
+			set result = ##class(REDIS.CommandsHandling.Functions).SetVariable($LIST(cmdPipeline,2),$LIST(cmdPipeline,3))
+		}else{
+			set result = "(nil)"
+		}
+	}
+	else{
+		s result = "NotExist"
+	}
+	ret result
+}
+
+ClassMethod TestEXandPX(cmdPipeline As %List, pos As %Integer) As %String
+{
+		set option = $ZCONVERT($LIST(cmdPipeline,pos),"U")
 		if (option = "EX"){
-			if (##class(REDIS.CommandsHandling.Functions).IsRedisNumber($LIST(cmdPipeline,5),0)){
-				do ##class(REDIS.CommandsHandling.Functions).SetTimedVariable($LIST(cmdPipeline,2),$LIST(cmdPipeline,3),$LIST(cmdPipeline,5))
+			if (##class(REDIS.CommandsHandling.Functions).IsRedisNumber($LIST(cmdPipeline,(pos+1)),0)){
+				do ##class(REDIS.CommandsHandling.Functions).SetTimedVariable($LIST(cmdPipeline,2),$LIST(cmdPipeline,3),$LIST(cmdPipeline,(pos+1)))
 				set result = "OK"
 			}else{
 				set result = ##class(REDIS.Terminal.ErrorHandler).NotNumberNotInteger()
 			}			
 		}
 		elseif(option = "PX"){
-			if (##class(REDIS.CommandsHandling.Functions).IsRedisNumber($LIST(cmdPipeline,5),0)){
+			if (##class(REDIS.CommandsHandling.Functions).IsRedisNumber($LIST(cmdPipeline,(pos+1)),0)){
 				// conversion to miliseconds:
-				set $LIST(cmdPipeline,5) = $LIST(cmdPipeline,5)/1000
-				do ##class(REDIS.CommandsHandling.Functions).SetTimedVariable($LIST(cmdPipeline,2),$LIST(cmdPipeline,3),$LIST(cmdPipeline,5))
+				set $LIST(cmdPipeline,(pos+1)) = $LIST(cmdPipeline,(pos+1))/1000
+				do ##class(REDIS.CommandsHandling.Functions).SetTimedVariable($LIST(cmdPipeline,2),$LIST(cmdPipeline,3),$LIST(cmdPipeline,(pos+1)))
 				set result = "OK"
 			}else{
 				set result = ##class(REDIS.Terminal.ErrorHandler).NotNumberNotInteger()
 			}
-			
 		}
 		else{
-			set result = ##class(REDIS.Terminal.ErrorHandler).SyntaxError(" Option """_option_""" not exist, see ""help set""")
+			s result = "NotExist"
 		}
-	}
-	
-	do ##class(REDIS.CommandsHandling.Functions).UnlockGlobal($LIST(cmdPipeline,2))
-	
-	return result
+		
+		ret result
 }
 
 ClassMethod GetHelp() As %String

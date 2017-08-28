@@ -4,6 +4,9 @@ Class REDIS.Commands.PEXPIRE Extends REDIS.CommandsHandling.CommandPrescribtion 
 /// constant max parameters
 Parameter maxParameters = 2;
 
+/// constant min parameters
+Parameter minParameters = 2;
+
 ClassMethod RunCommand(cmdPipeline As %List) As %String
 {
 	set result = ""
@@ -17,8 +20,7 @@ ClassMethod RunCommand(cmdPipeline As %List) As %String
 			   set value = ##class(REDIS.CommandsHandling.Functions).GetData($LIST(cmdPipeline,2))
 
 			   if (  ##class(REDIS.CommandsHandling.Functions).GetLeftTimeToLive($LIST(cmdPipeline,2)) > 0 && $DATA(value)){
-						
-					// TODO TEST IF seconds($LIST(cmdPipeline,3)) is NUMBER, 
+						 
 					// redis allows even 00023 format interpreted as 23s
 					if (##class(REDIS.CommandsHandling.Functions).IsRedisNumber($LIST(cmdPipeline,3),0)) {
 										
@@ -31,7 +33,7 @@ ClassMethod RunCommand(cmdPipeline As %List) As %String
 						set result = "(integer) 1"
 					  
 					} else {
-					 set result = ##class(REDIS.Terminal.ErrorHandler).NotNumber(cmdPipeline)
+					 set result = ##class(REDIS.Terminal.ErrorHandler).NotNumberNotInteger()
 					}
 
 					
@@ -52,7 +54,7 @@ ClassMethod RunCommand(cmdPipeline As %List) As %String
 				set result = "(integer) 1"
 					  
 			} else {
-			 set result = ##class(REDIS.Terminal.ErrorHandler).NotNumber(cmdPipeline)
+			 set result = ##class(REDIS.Terminal.ErrorHandler).NotNumberNotInteger()
 			}
 			
 		}

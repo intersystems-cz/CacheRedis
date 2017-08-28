@@ -70,34 +70,28 @@ ClassMethod Del(args... As %String) As %String
 		}
 		ret ##class(REDIS.Commands.DEL).RunCommand($LISTFROMSTRING(textualCommand," "))
 	}
-	/*
-	if ($DATA(args)>0){
-		 set textualCommand = ""
-		 For i = 1 : 1 : $GET(args, 0)
-		 {
-		     if ($DATA(args(i))>0){
-		     	set textualCommand = textualCommand_" "_$GET(args(i), "<NULL>")
-		     }
-		 }
-	 	ret ##class(REDIS.Commands.DEL).RunCommand($LISTFROMSTRING(textualCommand," "))
- 	}
- */
 }
 
-ClassMethod Set(varName As %String, value As %String, option As %String, time As %String) As %String
+ClassMethod Set(args... As %String) As %String
 {
-	if ($DATA(varName)>0){
-		if ($DATA(option)>0){
-				if ($DATA(time)>0){
-					set textualListCommand = ##class(REDIS.API).ConvertToList(varName,value,option,time)
-				}else{
-					set textualListCommand = ##class(REDIS.API).ConvertToList(varName,value,option)
-				}
-	 	}else{
-			set textualListCommand = ##class(REDIS.API).ConvertToList(varName,value) 	
-	 	}
-	 	ret ##class(REDIS.Commands.SET).RunCommand(textualListCommand)
- 	}
+		if ($DATA(args)>0){
+		set textualCommand = ""
+		/// Needful for REST call. If it is list, we talk about rest call 
+		if ($LISTVALID($GET(args(1), "<NULL>"))){
+			 For i = 1 : 1 : $LL($GET(args(1), "<NULL>"))
+			 {
+			    set textualCommand = textualCommand_" "_$LI($GET(args(1), "<NULL>"),i)			 
+			 } 
+		}else{
+			 For i = 1 : 1 : $GET(args, 0)
+			 {
+			     if ($DATA(args(i))>0){
+			     	set textualCommand = textualCommand_" "_$GET(args(i), "<NULL>")
+			     }
+			 }
+		}
+		ret ##class(REDIS.Commands.SET).RunCommand($LISTFROMSTRING(textualCommand," "))
+	}
 }
 
 ClassMethod Get(varName As %String) As %String
@@ -171,7 +165,10 @@ ClassMethod Type(varName As %String) As %String
 ClassMethod Ping(varName As %String) As %String
 {
 	if ($DATA(varName)=0){
-		set varName = "ping"
+	 	set textualListCommand = $LB()
+	 	ret ##class(REDIS.Commands.PING).RunCommand(textualListCommand)
+ 	}
+ 	else {
 	 	set textualListCommand = ##class(REDIS.API).ConvertToList(varName)
 	 	ret ##class(REDIS.Commands.PING).RunCommand(textualListCommand)
  	}

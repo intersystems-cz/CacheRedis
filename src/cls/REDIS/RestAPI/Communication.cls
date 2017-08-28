@@ -7,44 +7,27 @@ XData UrlMap
 <Routes>
 
    <Route Url="/append" Method="PUT" Call="Append"/>
-   <Route Url="/del" Method="PUT" Call="Del"/>
-   <Route Url="/help" Method="PUT" Call="Help"/>
-   
-   <Route Url="/set" Method="PUT" Call="Set"/>
-   <Route Url="/get" Method="PUT" Call="Get"/>
-   <Route Url="/incr" Method="PUT" Call="Incr"/>
    <Route Url="/decr" Method="PUT" Call="Decr"/>
-   
-     <Route Url="/setTimed" Method="PUT" Call="SetTimed"/>
-   
+   <Route Url="/decrby" Method="PUT" Call="Decrby"/>  
+   <Route Url="/del" Method="DELETE" Call="Del"/>
+   <Route Url="/exists" Method="PUT" Call="Exists"/>
+   <Route Url="/expire" Method="POST" Call="Expire"/>
+   <Route Url="/get" Method="PUT" Call="Get"/>
+   <Route Url="/help" Method="PUT" Call="Help"/> <!-- test if cant have multiple methods PUT and GET -->
+   <Route Url="/incr" Method="PUT" Call="Incr"/>
+   <Route Url="/incrby" Method="PUT" Call="Incrby"/>
+   <Route Url="/pexpire" Method="POST" Call="Pexpire"/>
+   <Route Url="/ping" Method="PUT" Call="Ping"/>
+   <Route Url="/pttl" Method="PUT" Call="Pttl"/>
+   <Route Url="/set" Method="POST" Call="Set"/>
+   <Route Url="/strlen" Method="PUT" Call="Strlen"/>
+   <Route Url="/time" Method="GET" Call="Time"/> 
+   <Route Url="/ttl" Method="PUT" Call="Ttl"/>
+   <Route Url="/type" Method="PUT" Call="Type"/>
+     
 </Routes>
 }
 
-/* pattern to copy for new method/command
-
-/// USAGE - APPEND expected input: 
-/// 	1. {"key":"varName"}
-///		2. {"value":"val-string"}
-///
-ClassMethod Append() As %Status
-{
-	set jsonObject = {}.%FromJSON(%request.Content)
-	set result = ..TestNumArguments(jsonObject,"append")
-	
-	if ( result = "OK")
-	{
-
-	}
-	
-	set resultObj = {
-		"Result": (result)
-    }
-    write resultObj.%ToJSON()
-
-	return $$$OK
-}
-
-*/
 /// This REST API works by reading JSON object input and after that calling logic with JSON respond.
 /// REST API can read this shape of JSON object content:
 /// 
@@ -56,7 +39,7 @@ ClassMethod Append() As %Status
 /// 
 /// 
 /// Example of full call of JSON object, for example for URL /set:
-///  {"key1":"timedVar","val1":"344","option":"EX","time":"10"}
+///  {"key1":"timedVar","val1":"344","opt1":"EX","time":"10"}
 /// USAGE - APPEND expected input: 
 /// 	1. {"key1":"varName"}
 /// 		2. {"val1":"val-string"}
@@ -79,36 +62,66 @@ ClassMethod Append() As %Status
 	return $$$OK
 }
 
-/// call set method with key and value pair parameters
+/// USAGE - SET expected input: 
+/// 	1. {"key1":"varName"}
+/// 		2. {"val1":"val-string"}
+/// 		3. {"opt1":"val-option"}
+/// 		4. {"opt2":"val-option"}
+/// 		5. {"val2":"val-option"}
+/// 
+/// Examples of full call of JSON object, for example for URL /set:
+///  {"key1":"timedVar","val1":"344","opt1":"EX","time":"10"}
+///  {"key1":"timedVar","val1":"344","opt1":"NX","opt2":"EX","time":"10"}
+///  {"key1":"timedVar","val1":"344","opt1":"EX","time":"10","opt2":"XX"}
+///  {"key1":"timedVar","val1":"344","}
+/// 
 ClassMethod Set() As %Status
 {
-	set setObject = {}.%FromJSON(%request.Content)
-	set key = setObject.key
-	set value = setObject.value
+	set jsonObject = {}.%FromJSON(%request.Content)
+	set result = ..TestNumArguments(jsonObject,"set")
 	
-	set redis = ##class(REDIS.Terminal.InputHandler).%New(0)
-	set result = redis.Run("SET "_key_" "_value)
+	if ( result = "OK")
+	{
+		set iter = jsonObject.%GetIterator()
+		
+		s keyNumber = 0
+		while iter.%GetNext(.key, .value) {
+			s keyNumber = $Increment(keyNumber,1)
+			if (keyNumber = 1){
+				s list = $LB(value)
+			}else{
+				s list = list_$LB(value)
+			} 
+		}
 	
-	set obj = {
-		"Communication OK ": (result)
+	    s result = ##class(REDIS.API).Set(list)
+	}
+	
+	set resultObj = {
+		"Result": (result)
     }
-    write obj.%ToJSON()
+    write resultObj.%ToJSON()
 
 	return $$$OK
 }
 
+/// USAGE - GET expected input: 
+/// 	1. {"key1":"varName"}
+/// 
 ClassMethod Get() As %Status
 {
-	set setObject = {}.%FromJSON(%request.Content)
-	set key = setObject.key
+	set jsonObject = {}.%FromJSON(%request.Content)
+	set result = ..TestNumArguments(jsonObject,"get")
 	
-	set redis = ##class(REDIS.Terminal.InputHandler).%New(0)
-	set result = redis.Run("GET "_key)
+	if ( result = "OK")
+	{
+	    s result = ##class(REDIS.API).Get(jsonObject.key1)
+	}
 	
-	set obj = {
-		"Communication OK ": (result)
+	set resultObj = {
+		"Result": (result)
     }
-    write obj.%ToJSON()
+    write resultObj.%ToJSON()
 
 	return $$$OK
 }
@@ -148,34 +161,295 @@ ClassMethod Del() As %Status
 	return $$$OK
 }
 
+/// USAGE - INCR expected input: 
+/// 	1. {"key1":"var1"}
+/// 
 ClassMethod Incr() As %Status
 {
-	set setObject = {}.%FromJSON(%request.Content)
-	set key = setObject.key
+	set jsonObject = {}.%FromJSON(%request.Content)
+	set result = ..TestNumArguments(jsonObject,"incr")
 	
-	set redis = ##class(REDIS.Terminal.InputHandler).%New(0)
-	set result = redis.Run("INCR "_key)
+	if ( result = "OK")
+	{
+	    s result = ##class(REDIS.API).Incr(jsonObject.key1)
+	}
 	
-	set obj = {
-		"Communication OK ": (result)
+	set resultObj = {
+		"Result": (result)
     }
-    write obj.%ToJSON()
+    write resultObj.%ToJSON()
 
 	return $$$OK
 }
 
+/// USAGE - DECR expected input: 
+/// 	1. {"key1":"var1"}
+/// 
 ClassMethod Decr() As %Status
 {
-	set setObject = {}.%FromJSON(%request.Content)
-	set key = setObject.key
+	set jsonObject = {}.%FromJSON(%request.Content)
+	set result = ..TestNumArguments(jsonObject,"decr")
 	
-	set redis = ##class(REDIS.Terminal.InputHandler).%New(0)
-	set result = redis.Run("DECR "_key)
+	if ( result = "OK")
+	{
+	    s result = ##class(REDIS.API).Decr(jsonObject.key1)
+	}
 	
-	set obj = {
-		"Communication OK ": (result)
+	set resultObj = {
+		"Result": (result)
     }
-    write obj.%ToJSON()
+    write resultObj.%ToJSON()
+
+	return $$$OK
+}
+
+/// USAGE - DECRBY expected input: 
+/// 	1. {"key1":"var1"}
+/// 	2. {"val1":"integer"}
+/// 
+ClassMethod Decrby() As %Status
+{
+	set jsonObject = {}.%FromJSON(%request.Content)
+	set result = ..TestNumArguments(jsonObject,"decrby")
+	
+	if ( result = "OK")
+	{
+	    s result = ##class(REDIS.API).Decrby(jsonObject.key1,jsonObject.val1)
+	}
+	
+	set resultObj = {
+		"Result": (result)
+    }
+    write resultObj.%ToJSON()
+
+	return $$$OK
+}
+
+/// USAGE - INCRBY expected input: 
+/// 	1. {"key1":"var1"}
+/// 	2. {"val1":"integer"}
+/// 
+ClassMethod Incrby() As %Status
+{
+	set jsonObject = {}.%FromJSON(%request.Content)
+	set result = ..TestNumArguments(jsonObject,"incrby")
+	
+	if ( result = "OK")
+	{
+	    s result = ##class(REDIS.API).Incrby(jsonObject.key1,jsonObject.val1)
+	}
+	
+	set resultObj = {
+		"Result": (result)
+    }
+    write resultObj.%ToJSON()
+
+	return $$$OK
+}
+
+/// USAGE - EXISTS expected input: 
+/// 	1. {"key1":"var1"}
+/// 
+ClassMethod Exists() As %Status
+{
+	set jsonObject = {}.%FromJSON(%request.Content)
+	set result = ..TestNumArguments(jsonObject,"exists")
+	
+	if ( result = "OK")
+	{
+	    s result = ##class(REDIS.API).Exists(jsonObject.key1)
+	}
+	
+	set resultObj = {
+		"Result": (result)
+    }
+    write resultObj.%ToJSON()
+
+	return $$$OK
+}
+
+/// USAGE - EXPIRE expected input: 
+/// 	1. {"key1":"var1"}
+/// 		2. {"time":"seconds"}
+/// 
+ClassMethod Expire() As %Status
+{
+	set jsonObject = {}.%FromJSON(%request.Content)
+	set result = ..TestNumArguments(jsonObject,"expire")
+	
+	if ( result = "OK")
+	{
+	    s result = ##class(REDIS.API).Expire(jsonObject.key1,jsonObject.time)
+	}
+	
+	set resultObj = {
+		"Result": (result)
+    }
+    write resultObj.%ToJSON()
+
+	return $$$OK
+}
+
+/// USAGE - PEXPIRE expected input: 
+/// 	1. {"key1":"var1"}
+/// 		2. {"time":"miliseconds"}
+/// 
+ClassMethod Pexpire() As %Status
+{
+	set jsonObject = {}.%FromJSON(%request.Content)
+	set result = ..TestNumArguments(jsonObject,"pexpire")
+	
+	if ( result = "OK")
+	{
+	    s result = ##class(REDIS.API).Pexpire(jsonObject.key1,jsonObject.time)
+	}
+	
+	set resultObj = {
+		"Result": (result)
+    }
+    write resultObj.%ToJSON()
+
+	return $$$OK
+}
+
+/// USAGE - PING expected input: 
+/// 	1. {"val1":"value-to-return"} - optional
+/// 
+ClassMethod Ping() As %Status
+{
+
+	try {
+		set jsonObject = {}.%FromJSON(%request.Content)
+		set result = ..TestNumArguments(jsonObject,"ping")
+		s val = jsonObject.val1
+	} catch(e){
+		/// if called help without keys
+		s val = ""
+	}
+	
+	if ( result = "OK")
+	{
+		if (val =""){
+			s result = ##class(REDIS.API).Ping()
+		}else{
+			s result = ##class(REDIS.API).Ping(val)
+		}
+	}
+	
+	set resultObj = {
+		"Result": (result)
+    }
+    write resultObj.%ToJSON()
+
+	return $$$OK
+}
+
+/// USAGE - PTTL expected input: 
+/// 	1. {"key1":"var1"}
+/// 
+ClassMethod Pttl() As %Status
+{
+	set jsonObject = {}.%FromJSON(%request.Content)
+	set result = ..TestNumArguments(jsonObject,"pttl")
+	
+	if ( result = "OK")
+	{
+	    s result = ##class(REDIS.API).Pttl(jsonObject.key1)
+	}
+	
+	set resultObj = {
+		"Result": (result)
+    }
+    write resultObj.%ToJSON()
+
+	return $$$OK
+}
+
+/// USAGE - TTL expected input: 
+/// 	1. {"key1":"var1"}
+/// 
+ClassMethod Ttl() As %Status
+{
+	set jsonObject = {}.%FromJSON(%request.Content)
+	set result = ..TestNumArguments(jsonObject,"ttl")
+	
+	if ( result = "OK")
+	{
+	    s result = ##class(REDIS.API).Ttl(jsonObject.key1)
+	}
+	
+	set resultObj = {
+		"Result": (result)
+    }
+    write resultObj.%ToJSON()
+
+	return $$$OK
+}
+
+/// USAGE - STRLEN expected input: 
+/// 	1. {"key1":"var1"}
+/// 
+ClassMethod Strlen() As %Status
+{
+	set jsonObject = {}.%FromJSON(%request.Content)
+	set result = ..TestNumArguments(jsonObject,"strlen")
+	
+	if ( result = "OK")
+	{
+	    s result = ##class(REDIS.API).Strlen(jsonObject.key1)
+	}
+	
+	set resultObj = {
+		"Result": (result)
+    }
+    write resultObj.%ToJSON()
+
+	return $$$OK
+}
+
+/// USAGE - TIME expected input: 
+/// 	1. {} - or no object
+/// 
+ClassMethod Time() As %Status
+{
+	try{
+		set jsonObject = {}.%FromJSON(%request.Content)
+		set result = ..TestNumArguments(jsonObject,"time")
+	}
+	catch(e){
+		set result = "OK"
+	}
+	
+	if ( result = "OK")
+	{
+	    s result = ##class(REDIS.API).Time()
+	}
+	
+	set resultObj = {
+		"Result": (result)
+    }
+    write resultObj.%ToJSON()
+
+	return $$$OK
+}
+
+/// USAGE - TYPE expected input: 
+/// 	1. {"key1":"var1"}
+/// 
+ClassMethod Type() As %Status
+{
+	set jsonObject = {}.%FromJSON(%request.Content)
+	set result = ..TestNumArguments(jsonObject,"type")
+	
+	if ( result = "OK")
+	{
+	    s result = ##class(REDIS.API).Type(jsonObject.key1)
+	}
+	
+	set resultObj = {
+		"Result": (result)
+    }
+    write resultObj.%ToJSON()
 
 	return $$$OK
 }
@@ -204,32 +478,6 @@ ClassMethod Help() As %Status
 	
 	set obj = {
 		"Result": (result)
-    }
-    write obj.%ToJSON()
-
-	return $$$OK
-}
-
-/*
-
-	//if ('$D(key)){
-	//	s key = ""
-	//}
-	//set result = ##class(REDIS.Shell).Execute("HELP "_key)
-*/
-ClassMethod SetTimed() As %Status
-{
-	set setObject = {}.%FromJSON(%request.Content)
-	set key = setObject.key
-	set value = setObject.value
-	set option = setObject.option
-	set time = setObject.time
-	
-	set redis = ##class(REDIS.Terminal.InputHandler).%New(0)
-	set result = redis.Run("SET "_key_" "_value_" "_option_" "_time)
-	
-	set obj = {
-		"Communication OK ": (result)
     }
     write obj.%ToJSON()
 
