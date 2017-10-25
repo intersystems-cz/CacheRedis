@@ -13,7 +13,7 @@ Method TestStrlen()
 	 
 	 s ^data("test") = ""
 	 
-	 do $$$AssertEquals(##class(REDIS.Shell).Execute("STRLEN test"),"(integer) 0", "Test STRLEN on empty string variable")
+	 do $$$AssertEquals(##class(REDIS.Shell).Execute("STRLEN test"),"0", "Test STRLEN on empty string variable")
 	 
 	/// if someone used "test2" global, backup data
 	 if ($DATA(^data("test2"))) {
@@ -22,7 +22,7 @@ Method TestStrlen()
 	 
 	 s ^data("test2") = ""
 	 
-	 do $$$AssertEquals(##class(REDIS.Shell).Execute("STRLEN test2"),"(integer) 0", "Test STRLEN on non existing variable")
+	 do $$$AssertEquals(##class(REDIS.Shell).Execute("STRLEN test2"),"0", "Test STRLEN on non existing variable")
 
 	/// if someone used "test3" global, backup data
 	 if ($DATA(^data("test3"))) {
@@ -33,7 +33,7 @@ Method TestStrlen()
 	
 	 s ^data("test3") ="4fs2332df5"
 	 
-	 do $$$AssertNotEquals(##class(REDIS.Shell).Execute("STRLEN test3"),"(integer) 7", "Test STRLEN on wrong value 7, 10 is correct")
+	 do $$$AssertNotEquals(##class(REDIS.Shell).Execute("STRLEN test3"),"7", "Test STRLEN on wrong value 7, 10 is correct")
 	 
 	 
 	 if ($DATA(temp)){
@@ -66,12 +66,12 @@ Method TestAppend()
 	 	kill ^data("test")
 	 }
 
-	 do $$$AssertEquals(##class(REDIS.Shell).Execute("APPEND test supervalue45data"),"(integer) 16", "Test APPEND on non existing variable")
+	 do $$$AssertEquals(##class(REDIS.Shell).Execute("APPEND test supervalue45data"),"16", "Test APPEND on non existing variable")
 	 
 	 kill ^data("test")
 	 s ^data("test") = "supervalue45data"
 	 
-	 do $$$AssertNotEquals(##class(REDIS.Shell).Execute("APPEND test anotherData"),"(integer) 15", "Test APPEND on existing variable on wrong value")
+	 do $$$AssertNotEquals(##class(REDIS.Shell).Execute("APPEND test anotherData"),"15", "Test APPEND on existing variable on wrong value")
 
 	 if ($DATA(temp)) {
 	 	s ^data("test") = temp
@@ -89,15 +89,15 @@ Method TestDecr()
 	 }
 	 s ^data("test") = 73
 	 
-	 do $$$AssertEquals(##class(REDIS.Shell).Execute("DECR test"),"(integer) 72", "Test DECR on existing positive number variable")
+	 do $$$AssertEquals(##class(REDIS.Shell).Execute("DECR test"),"72", "Test DECR on existing positive number variable")
 	 
 	 s ^data("test") = 0
 	 	 
-	 do $$$AssertNotEquals(##class(REDIS.Shell).Execute("DECR test"),"(integer) 1", "Test DECR on underzero result on wrong number")
+	 do $$$AssertNotEquals(##class(REDIS.Shell).Execute("DECR test"),"1", "Test DECR on underzero result on wrong number")
 	 
 	 kill ^data("test")
 	 
-	 do $$$AssertEquals(##class(REDIS.Shell).Execute("DECR test"),"(integer) -1", "Test DECR on non existing variable")
+	 do $$$AssertEquals(##class(REDIS.Shell).Execute("DECR test"),"-1", "Test DECR on non existing variable")
 	 
 	 if ($DATA(temp)) {
 	 	s ^data("test") = temp
@@ -114,15 +114,15 @@ Method TestDecrby()
 	 }
 	 s ^data("test") = 532
 	 
-	 do $$$AssertEquals(##class(REDIS.Shell).Execute("DECRBY test 43"),"(integer) 489", "Test DECRBY on existing positive number variable")
+	 do $$$AssertEquals(##class(REDIS.Shell).Execute("DECRBY test 43"),"489", "Test DECRBY on existing positive number variable")
 	 
 	 s ^data("test") = 0
 	 	 
-	 do $$$AssertNotEquals(##class(REDIS.Shell).Execute("DECRBY test 50"),"(integer) 50", "Test DECRBY on underzero result on wrong number")
+	 do $$$AssertNotEquals(##class(REDIS.Shell).Execute("DECRBY test 50"),"50", "Test DECRBY on underzero result on wrong number")
 	 
 	 kill ^data("test")
 	 
-	 do $$$AssertEquals(##class(REDIS.Shell).Execute("DECRBY test 37"),"(integer) -37", "Test DECRBY on non existing variable")
+	 do $$$AssertEquals(##class(REDIS.Shell).Execute("DECRBY test 37"),"-37", "Test DECRBY on non existing variable")
 	 
 	 if ($DATA(temp)) {
 	 	s ^data("test") = temp
@@ -158,18 +158,18 @@ Method TestDel()
 	 s ^data("test2") = "5dfsdf3sdg2"
 	 s ^data("test3") = "hfhdf5df3sdg234543"
 	 
-	 do $$$AssertEquals(##class(REDIS.Shell).Execute("DEL test"),"(integer) 1", "Test DEL on existing variable")
+	 do $$$AssertEquals(##class(REDIS.Shell).Execute("DEL test"),"1", "Test DEL on existing variable")
 	 
 	 s ^data("test") = 2344525
 	 
-	 do $$$AssertEquals(##class(REDIS.Shell).Execute("DEL test4"),"(integer) 0", "Test DEL on non existing variable")
+	 do $$$AssertEquals(##class(REDIS.Shell).Execute("DEL test4"),"0", "Test DEL on non existing variable")
 	 	 
-	 do $$$AssertNotEquals(##class(REDIS.Shell).Execute("DEL test test2"),"(integer) 1", "Test DEL multiple arguments")
+	 do $$$AssertNotEquals(##class(REDIS.Shell).Execute("DEL test test2"),"1", "Test DEL multiple arguments")
 	 
 	 s ^data("test") = 2344525
 	 s ^data("test2") = 5346634
 	 
-	 do $$$AssertEquals(##class(REDIS.Shell).Execute("DEL test test2 test3 test4"),"(integer) 3", "Test DEL multiple arguments")
+	 do $$$AssertEquals(##class(REDIS.Shell).Execute("DEL test test2 test3 test4"),"3", "Test DEL multiple arguments")
 	 	 
 	 
 	 if ($DATA(temp)) {
@@ -205,11 +205,11 @@ Method TestExists()
 	 	kill ^data("test")
 	 }
 	 
-	 do $$$AssertNotEquals(##class(REDIS.Shell).Execute("EXISTS test"),"(integer) 1", "Test EXISTS on non existing variable")
+	 do $$$AssertNotEquals(##class(REDIS.Shell).Execute("EXISTS test"),"1", "Test EXISTS on non existing variable")
 	 
 	 s ^data("test") = 42342
 	 
-	 do $$$AssertEquals(##class(REDIS.Shell).Execute("EXISTS test"),"(integer) 1", "Test EXISTS on existing variable")
+	 do $$$AssertEquals(##class(REDIS.Shell).Execute("EXISTS test"),"1", "Test EXISTS on existing variable")
 	 
 	 
 	 if ($DATA(temp)) {
@@ -237,11 +237,11 @@ Method TestExpire()
 	 do ##class(REDIS.OnStartJobs).RunJobCleaner()
 	 HANG 1
 	 
-	 do $$$AssertNotEquals(##class(REDIS.Shell).Execute("EXPIRE test 2"),"(integer) 1", "Test EXPIRE on non existing variable")
+	 do $$$AssertNotEquals(##class(REDIS.Shell).Execute("EXPIRE test 2"),"1", "Test EXPIRE on non existing variable")
 	 
 	 s ^data("test") = 42342
 	 
-	 do $$$AssertEquals(##class(REDIS.Shell).Execute("EXPIRE test 2"),"(integer) 1", "Test EXPIRE on existing variable")
+	 do $$$AssertEquals(##class(REDIS.Shell).Execute("EXPIRE test 2"),"1", "Test EXPIRE on existing variable")
 	 
 	 HANG 3
 	 
@@ -283,11 +283,11 @@ Method TestPexpire()
 	 do ##class(REDIS.OnStartJobs).RunJobCleaner()
 	 HANG 1
 	 
-	 do $$$AssertNotEquals(##class(REDIS.Shell).Execute("PEXPIRE test 2000"),"(integer) 1", "Test PEXPIRE on non existing variable")
+	 do $$$AssertNotEquals(##class(REDIS.Shell).Execute("PEXPIRE test 2000"),"1", "Test PEXPIRE on non existing variable")
 	 
 	 s ^data("test") = 42342
 	 
-	 do $$$AssertEquals(##class(REDIS.Shell).Execute("PEXPIRE test 2000"),"(integer) 1", "Test PEXPIRE on existing variable")
+	 do $$$AssertEquals(##class(REDIS.Shell).Execute("PEXPIRE test 2000"),"1", "Test PEXPIRE on existing variable")
 	 
 	 HANG 3
 	 
@@ -329,11 +329,11 @@ Method TestTtl()
 	 do ##class(REDIS.OnStartJobs).RunJobCleaner()
 	 HANG 1
 	 
-	 do $$$AssertEquals(##class(REDIS.Shell).Execute("TTL test"),"(integer) -2", "Test TTL on non existing variable")
+	 do $$$AssertEquals(##class(REDIS.Shell).Execute("TTL test"),"-2", "Test TTL on non existing variable")
 	 
 	 s ^data("test") = 42342
 	 
-	 do $$$AssertEquals(##class(REDIS.Shell).Execute("TTL test"),"(integer) -1", "Test TTL on existing variable")
+	 do $$$AssertEquals(##class(REDIS.Shell).Execute("TTL test"),"-1", "Test TTL on existing variable")
 	 
 	 
 	set actualTime = $NOW()
@@ -344,11 +344,11 @@ Method TestTtl()
 	set whenToKillVariable = actualTimeInSec + 20
 	s ^data("test","expires") = whenToKillVariable
 	 
-	 do $$$AssertEquals(##class(REDIS.Shell).Execute("TTL test"),"(integer) 20", "Test TTL on existing timed variable")
+	 do $$$AssertEquals(##class(REDIS.Shell).Execute("TTL test"),"20", "Test TTL on existing timed variable")
 	 
 	 HANG 0.95
 	 
-	 do $$$AssertEquals(##class(REDIS.Shell).Execute("TTL test"),"(integer) 19", "Test TTL on existing timed variable")
+	 do $$$AssertEquals(##class(REDIS.Shell).Execute("TTL test"),"19", "Test TTL on existing timed variable")
 	 
 	 if ('isRunning)
 	 {
@@ -381,11 +381,11 @@ Method TestPttl()
 	 do ##class(REDIS.OnStartJobs).RunJobCleaner()
 	 HANG 1
 	 
-	 do $$$AssertEquals(##class(REDIS.Shell).Execute("PTTL test"),"(integer) -2", "Test PTTL on non existing variable")
+	 do $$$AssertEquals(##class(REDIS.Shell).Execute("PTTL test"),"-2", "Test PTTL on non existing variable")
 	 
 	 s ^data("test") = 42342
 	 
-	 do $$$AssertEquals(##class(REDIS.Shell).Execute("PTTL test"),"(integer) -1", "Test TTL on existing variable")
+	 do $$$AssertEquals(##class(REDIS.Shell).Execute("PTTL test"),"-1", "Test TTL on existing variable")
 	 
 	 
 	set actualTime = $NOW()
@@ -396,11 +396,11 @@ Method TestPttl()
 	set whenToKillVariable = actualTimeInSec + 101
 	s ^data("test","expires") = whenToKillVariable
 	 
-	 do $$$AssertEquals($length(##class(REDIS.Shell).Execute("PTTL test")) = 16 ,1, "Test PTTL on existing timed variable")
+	 do $$$AssertEquals($length(##class(REDIS.Shell).Execute("PTTL test")) = 6 ,1, "Test PTTL on existing timed variable")
 	 
 	 HANG 1.5
 	 
-	 do $$$AssertEquals($length(##class(REDIS.Shell).Execute("PTTL test")) = 15,1, "Test PTTL on existing timed variable")
+	 do $$$AssertEquals($length(##class(REDIS.Shell).Execute("PTTL test")) = 5,1, "Test PTTL on existing timed variable")
 	 
 	 if ('isRunning)
 	 {
@@ -424,7 +424,7 @@ Method TestGet()
 	 }
 
 	 
-	 do $$$AssertNotEquals(##class(REDIS.Shell).Execute("GET test"),"(integer) 1", "Test GET on non existing variable")
+	 do $$$AssertNotEquals(##class(REDIS.Shell).Execute("GET test"),"1", "Test GET on non existing variable")
 	 
 	 s ^data("test") = "my23test55"
 	 	 
@@ -467,7 +467,7 @@ Method TestSet()
 	 
 	 k ^data("test")
 	 
-	 do $$$AssertNotEquals(##class(REDIS.Shell).Execute("SET test data53 NX"),"(NIL)", "Test SET on non existing var")
+	 do $$$AssertNotEquals(##class(REDIS.Shell).Execute("SET test data53 NX"),"(nil)", "Test SET on non existing var")
 	 
 	 s ^data("test") = "asdd355sf"
 	 
@@ -552,15 +552,15 @@ Method TestIncr()
 	 }
 	 s ^data("test") = 73
 	 
-	 do $$$AssertEquals(##class(REDIS.Shell).Execute("INCR test"),"(integer) 74", "Test INCR on existing positive number variable")
+	 do $$$AssertEquals(##class(REDIS.Shell).Execute("INCR test"),"74", "Test INCR on existing positive number variable")
 	 
 	 s ^data("test") = 0
 	 	 
-	 do $$$AssertNotEquals(##class(REDIS.Shell).Execute("INCR test"),"(integer) -1", "Test INCR on positive result on wrong number")
+	 do $$$AssertNotEquals(##class(REDIS.Shell).Execute("INCR test"),"-1", "Test INCR on positive result on wrong number")
 	 
 	 kill ^data("test")
 	 
-	 do $$$AssertEquals(##class(REDIS.Shell).Execute("INCR test"),"(integer) 1", "Test INCR on non existing variable")
+	 do $$$AssertEquals(##class(REDIS.Shell).Execute("INCR test"),"1", "Test INCR on non existing variable")
 	 
 	 if ($DATA(temp)) {
 	 	s ^data("test") = temp
@@ -577,15 +577,15 @@ Method TestIncrby()
 	 }
 	 s ^data("test") = 532
 	 
-	 do $$$AssertEquals(##class(REDIS.Shell).Execute("INCRBY test 43"),"(integer) 575", "Test INCRBY on existing positive number variable")
+	 do $$$AssertEquals(##class(REDIS.Shell).Execute("INCRBY test 43"),"575", "Test INCRBY on existing positive number variable")
 	 
 	 s ^data("test") = 0
 	 	 
-	 do $$$AssertNotEquals(##class(REDIS.Shell).Execute("INCRBY test 50"),"(integer) -50", "Test INCRBY on positive result on wrong number")
+	 do $$$AssertNotEquals(##class(REDIS.Shell).Execute("INCRBY test 50"),"-50", "Test INCRBY on positive result on wrong number")
 	 
 	 kill ^data("test")
 	 
-	 do $$$AssertEquals(##class(REDIS.Shell).Execute("INCRBY test 37"),"(integer) 37", "Test INCRBY on non existing variable")
+	 do $$$AssertEquals(##class(REDIS.Shell).Execute("INCRBY test 37"),"37", "Test INCRBY on non existing variable")
 	 
 	 if ($DATA(temp)) {
 	 	s ^data("test") = temp

@@ -18,7 +18,7 @@ ClassMethod RunCommand(cmdPipeline As %List) As %String
 		// test condition if type of variable is string, if no "type" subscript exist, then it is string
 		if (##class(REDIS.CommandsHandling.Functions).IsGlobal($LIST(cmdPipeline,2),3) = 0){
 			set ^data($LIST(cmdPipeline,2)) = ^data($LIST(cmdPipeline,2))_$LIST(cmdPipeline,3)
-			set result = "(integer) "_##class(REDIS.CommandsHandling.Functions).GetStrlen($LIST(cmdPipeline,2))
+			set result = ##class(REDIS.CommandsHandling.Functions).GetStrlen($LIST(cmdPipeline,2))
 		}else{
 			set result = ##class(REDIS.Terminal.ErrorHandler).WrongTypeError()
 		}
@@ -26,7 +26,7 @@ ClassMethod RunCommand(cmdPipeline As %List) As %String
 	}else{
 		set result = ##class(REDIS.CommandsHandling.Functions).SetVariable($LIST(cmdPipeline,2),$LIST(cmdPipeline,3))
 		if (result = "OK"){
-			set result = "(integer) "_##class(REDIS.CommandsHandling.Functions).GetStrlen($LIST(cmdPipeline,2))
+			set result = ##class(REDIS.CommandsHandling.Functions).GetStrlen($LIST(cmdPipeline,2))
 		}else{
 			// nothing more, just result consist of error message that will be returned
 		}

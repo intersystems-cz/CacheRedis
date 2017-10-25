@@ -22,16 +22,16 @@ ClassMethod RunCommand(cmdPipeline As %List) As %String
 
 			   if ( lttl > 0 && $DATA(value)){
 			   
-			   		set result = "(integer) "_$FNUMBER((lttl*1000),"",0)
+			   		set result = $FNUMBER((lttl*1000),"",0)
 					
 			   } else{
-				set result = "(integer) -2"
+				set result = -2
 			   }
 		}else {
-			set result = "(integer) -1"
+			set result = -1
 		}
 	}else{
-		set result = "(integer) -2"
+		set result = -2
 	}
 	
 	do ##class(REDIS.CommandsHandling.Functions).UnlockGlobal($LIST(cmdPipeline,2))

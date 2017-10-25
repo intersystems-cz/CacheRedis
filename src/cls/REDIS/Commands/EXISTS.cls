@@ -17,15 +17,15 @@ ClassMethod RunCommand(cmdPipeline As %List) As %String
 	if ( ##class(REDIS.CommandsHandling.Functions).IsGlobal($LIST(cmdPipeline,2),1) '= 0 ){
 		if ( ##class(REDIS.CommandsHandling.Functions).IsGlobal($LIST(cmdPipeline,2),2) '= 0 ){
 			   if ( ##class(REDIS.CommandsHandling.Functions).GetLeftTimeToLive($LIST(cmdPipeline,2)) > 0 ){		
-				set result = "(integer) 1"
+				set result = 1
 			   } else{
-				set result = "(integer) 0"
+				set result = 0
 			   }
 		} else{
-			set result = "(integer) 1"
+			set result = 1
 		}
 	} else{
-	   set result = "(integer) 0"
+	   set result = 0
 	}
 	
 	do ##class(REDIS.CommandsHandling.Functions).UnlockGlobal($LIST(cmdPipeline,2))

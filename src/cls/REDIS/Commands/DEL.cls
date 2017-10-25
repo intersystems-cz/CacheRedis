@@ -21,7 +21,7 @@ ClassMethod RunCommand(cmdPipeline As %List) As %String
 	   do ##class(REDIS.CommandsHandling.Functions).UnlockGlobal($LIST(cmdPipeline,i))
 	}
 	
-	return "(integer) "_numDeleted
+	return numDeleted
 }
 
 ClassMethod GetHelp() As %String

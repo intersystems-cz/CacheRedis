@@ -70,6 +70,33 @@ ClassMethod GetStrlen(globalName As %String) As %Integer
 	ret $L(@("^"_$$$DATA_"("""_globalName_""")"))
 }
 
+/// Will return maximum parameters for command
+ClassMethod GetMaxParams(command As %String) As %Integer
+{
+	set classFunction = "REDIS.Commands."_$ZCONVERT(command,"U")
+	set maxParameters = $PARAMETER(classFunction,"maxParameters")
+	return maxParameters
+}
+
+/// Will return minimum parameters for command
+ClassMethod GetMinParams(command As %String) As %Integer
+{
+	set classFunction = "REDIS.Commands."_$ZCONVERT(command,"U")
+	set minParameters = $PARAMETER(classFunction,"minParameters")
+	return minParameters
+}
+
+ClassMethod IsCommand(command As %String) As %Boolean
+{
+	s val = $f(##class(REDIS.Shell).Execute(command),"function """_$ZCONVERT(command,"U")_""" is undefined")
+	if (val > 0){
+		return 0
+	}
+	else{
+		return 1
+	}
+}
+
 /// Will increase global by given number
 ClassMethod IncreaseBy(globalName As %String, number As %Integer)
 {

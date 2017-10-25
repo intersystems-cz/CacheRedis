@@ -30,7 +30,7 @@ ClassMethod RunCommand(cmdPipeline As %List) As %String
 						// interrupt cleaner process to recalculate hang time
 						do $System.Util.SendInterrupt(^cleanerPid)
 						
-						set result = "(integer) 1"
+						set result = 1
 					  
 					} else {
 					 set result = ##class(REDIS.Terminal.ErrorHandler).NotNumberNotInteger()
@@ -38,7 +38,7 @@ ClassMethod RunCommand(cmdPipeline As %List) As %String
 
 					
 			   } else{
-				set result = "(integer) 0"
+				set result = 0
 			   }
 		}else {
 		
@@ -51,7 +51,7 @@ ClassMethod RunCommand(cmdPipeline As %List) As %String
 				// interrupt cleaner process to recalculate hang time
 				do $System.Util.SendInterrupt(^cleanerPid)
 				
-				set result = "(integer) 1"
+				set result = 1
 					  
 			} else {
 			 set result = ##class(REDIS.Terminal.ErrorHandler).NotNumberNotInteger()
@@ -59,7 +59,7 @@ ClassMethod RunCommand(cmdPipeline As %List) As %String
 			
 		}
 	}else{
-		set result = "(integer) 0"
+		set result = 0
 	}
 	
 	do ##class(REDIS.CommandsHandling.Functions).UnlockGlobal($LIST(cmdPipeline,2))

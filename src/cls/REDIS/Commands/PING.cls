@@ -11,7 +11,6 @@ Parameter minParameters = 0;
 /// TODO LIST,SET,ZSET,HASH
 ClassMethod RunCommand(cmdPipeline As %List) As %String
 {
-	
 	set test = $LL(cmdPipeline)
 	
 	if (test > 1){

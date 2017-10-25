@@ -13,9 +13,9 @@ ClassMethod RunCommand(cmdPipeline As %List) As %String
 {
 	do ##class(REDIS.CommandsHandling.Functions).LockGlobal($LIST(cmdPipeline,2))
 	if (##class(REDIS.CommandsHandling.Functions).IsGlobal($LIST(cmdPipeline,2),1)){
-	  s result = "(integer) "_##class(REDIS.CommandsHandling.Functions).GetStrlen($LIST(cmdPipeline,2))
+	  s result = ##class(REDIS.CommandsHandling.Functions).GetStrlen($LIST(cmdPipeline,2))
 	}else{
-	  s result = "(integer) 0"
+	  s result = 0
 	}
 	do ##class(REDIS.CommandsHandling.Functions).UnlockGlobal($LIST(cmdPipeline,2))
 	

@@ -19,7 +19,7 @@ ClassMethod RunCommand(cmdPipeline As %List) As %String
 		if (##class(REDIS.CommandsHandling.Functions).IsRedisNumber($LIST(cmdPipeline,2),1) && 
 		##class(REDIS.CommandsHandling.Functions).IsRedisNumber($LIST(cmdPipeline,3),0)){
 	        do ##class(REDIS.CommandsHandling.Functions).DecreaseBy($LIST(cmdPipeline,2),$LIST(cmdPipeline,3))
-      		set status ="(integer) "_##class(REDIS.CommandsHandling.Functions).GetData($LIST(cmdPipeline,2))
+      		set status =##class(REDIS.CommandsHandling.Functions).GetData($LIST(cmdPipeline,2))
   		}else{
   			set status = ##class(REDIS.Terminal.ErrorHandler).NotNumberNotInteger() 
  		}					
@@ -28,7 +28,7 @@ ClassMethod RunCommand(cmdPipeline As %List) As %String
 			// needed to set variable if not exist
 			set status = ##class(REDIS.CommandsHandling.Functions).SetVariable($LIST(cmdPipeline,2),-$LIST(cmdPipeline,3))
 			if (status = "OK"){
-				set status = "(integer) "_##class(REDIS.CommandsHandling.Functions).GetData($LIST(cmdPipeline,2))
+				set status = ##class(REDIS.CommandsHandling.Functions).GetData($LIST(cmdPipeline,2))
 			}
 		}else{
   			set status = ##class(REDIS.Terminal.ErrorHandler).NotNumberNotInteger()
